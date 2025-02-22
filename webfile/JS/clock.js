@@ -91,6 +91,11 @@ $(function(){
         },1000);
         minute.update();
         hour.update();
-    })
+    });
+    $(window).on("pageshow",function(){
+        second.update();
+        minute.update();
+        hour.update();
+    });
 })
 
