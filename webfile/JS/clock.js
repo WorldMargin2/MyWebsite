@@ -92,7 +92,7 @@ $(function(){
         minute.update();
         hour.update();
     },timeout);
-    $(window).on("pageshow",function(){
+    $(window).on("visibilitychange",function(){
         second.update();
         minute.update();
         hour.update();
