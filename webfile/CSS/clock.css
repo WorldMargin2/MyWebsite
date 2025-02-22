@@ -1,0 +1,108 @@
+#clock *{
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+}
+
+
+#clock{
+    display: flex;
+    position: sticky;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 400px;
+    max-width: 400px;
+    width: max-content;
+    height: 150px;
+    bottom: 0;
+    right: 0;
+    border: #FFF solid 2px;
+    color:#FFF;
+}
+
+#clock span{
+    font-size: 30px;
+    font-weight: bolder;
+    transform: translateY(-20%);
+}
+
+#clock>div{
+    display: flex ;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #0FF;
+    width: calc(100% / 3);
+    height: 100%;
+}
+
+#clock>div>div{
+    position: relative;
+    width: max-content;
+}
+
+#clock .show_num{
+    position: relative;
+    perspective: 200px;
+    width: 100%;
+    height: 80%;
+}
+
+#clock .show_num>div{
+    position: absolute;
+    align-content: center;
+    backface-visibility: hidden;
+    background-color: #0FF;
+    width: 100%;
+    height: 100%;
+    color: white;
+    font-size: 50px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#clock .ele1{
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%);
+}
+#clock .ele2{
+    transform: rotateX(0deg);
+    transform-origin: center;
+    clip-path: polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%);
+}
+#clock .ele3{
+    transform: rotateX(180deg);
+    transform-origin: center;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 0% 50%);
+}
+#clock .ele4{
+    clip-path: polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%);
+}
+
+#clock .text{
+    align-content: center;
+    background-color: blue;
+    width: 100%;
+    bottom: 0;
+    height: 20%;
+    color: white;
+    font-size: 20px;
+    text-align: center;
+    border-radius: 0 0 5px 5px;
+}
+
+#clock .ele2.show_back{
+    transform: rotateX(180deg);
+    transition: all 0.5s;
+}
+#clock .ele3.show_back{
+    transform: rotateX(360deg);
+    transition: all 0.5s;
+}
