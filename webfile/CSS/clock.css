@@ -26,7 +26,7 @@
     color:#FFF;
 }
 
-#clock>span{
+#clock span{
     font-size: 30px;
     font-weight: bolder;
     transform: translateY(-20%);
