@@ -39,3 +39,6 @@ MyWebsite
 
 1. install flask
 2. install flask-wtf
+
+# demo video
+https://WorldMargin2.github.io/MyWebsite/md_resource/demo.mp4
