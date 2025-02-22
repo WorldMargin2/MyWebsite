@@ -42,4 +42,5 @@ MyWebsite
 
 # demo video
 ![Sample Video](https://github.com/user-attachments/assets/5705207f-ac28-4c93-8797-849c37b00f25)
+<video><resource src="https://github.com/user-attachments/assets/5705207f-ac28-4c93-8797-849c37b00f25"></resource></video>
 
