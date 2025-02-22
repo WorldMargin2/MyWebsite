@@ -8,16 +8,14 @@
 
 here are some exciting features of this project:
 
-- [] clock
-- [] the text have a transition effect when you visit the website.from transparent to opaque and 3D rotate,and translate up
-  
-- [] a trapezoid moves into the screen from the right side
-- [] the text will move to top-left and scale down when you scroll down,and the clock will move to top-right and scale down when you scroll down .
+- [ ] clock
+- [ ] the text have a transition effect when you visit the website.from transparent to opaque and 3D rotate,and translate up
+- [ ] a trapezoid moves into the screen from the right side
+- [ ] the text will move to top-left and scale down when you scroll down,and the clock will move to top-right and scale down when you scroll down .
 
 ## Project Structure
 
 ```
-<!-- webfile/(HTML,CSS/(clock.css,index.css),JS/(clock.js,index.js),templates/(index.html),ICON) -->
 MyWebsite
 ├── severBase.py
 ├── main.py
