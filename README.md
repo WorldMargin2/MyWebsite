@@ -8,11 +8,11 @@
 
 here are some exciting features of this project:
 
-- [x] clock
-- [x] the text have a transition effect when you visit the website.from transparent to opaque and 3D rotate,and translate up
+- [] clock
+- [] the text have a transition effect when you visit the website.from transparent to opaque and 3D rotate,and translate up
   
-- [x] a trapezoid moves into the screen from the right side
-- [x] the text will move to top-left and scale down when you scroll down,and the clock will move to top-right and scale down when you scroll down .
+- [] a trapezoid moves into the screen from the right side
+- [] the text will move to top-left and scale down when you scroll down,and the clock will move to top-right and scale down when you scroll down .
 
 ## Project Structure
 
