@@ -89,6 +89,7 @@ $(function(){
         setInterval(function(){
             second.update();
         },1000);
+        second.update();
         minute.update();
         hour.update();
     },timeout);
