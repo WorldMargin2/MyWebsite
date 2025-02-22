@@ -91,7 +91,7 @@ $(function(){
         },1000);
         minute.update();
         hour.update();
-    });
+    },timeout);
     $(window).on("pageshow",function(){
         second.update();
         minute.update();
