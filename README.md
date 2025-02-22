@@ -41,5 +41,5 @@ MyWebsite
 2. install flask-wtf
 
 # demo video
-![Sample Video](https://WorldMargin2.github.io/MyWebsite/md_resource/demo.mp4)
+![Sample Video](https://github.com/user-attachments/assets/5705207f-ac28-4c93-8797-849c37b00f25)
 
