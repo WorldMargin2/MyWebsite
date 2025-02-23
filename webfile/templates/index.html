@@ -2,6 +2,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 响应式布局 -->
+
     <title>WorldMargin's website</title>
     <script src="../JS/jquery.js"></script>
     <link rel="stylesheet" href="../CSS/index.css">
@@ -9,10 +11,10 @@
 </head>
 <body>
     <canvas id="background_canvas"></canvas>
-    <div style="height: 100vh;z-index: -101;"></div>
+    <!-- 占位元素 -->
+    <div style="height: 100vh;z-index: -101;background-color: (3, 3, 3);"></div>
     <div id="container">
         <div class="white_space">
-            
         </div>
         <div class="clock_container">
             <div id="clock">
@@ -54,10 +56,10 @@
     
             </div>
         </div>
-        
     </div>
     <h1 id="title" changed="false"><span>WorldMargin</span></h1>
-    <div style="height: 100vh;">
+    <div class="about_me" >
+        <h1>关于我</h1>
     </div>
 </body>
     <script src="../JS/index.js"></script>

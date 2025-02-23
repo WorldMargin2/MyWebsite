@@ -8,7 +8,7 @@ let tmp_h_center = 0;
 $(document).on("scroll", function() {
     const title = $("#title");
     const vh=window.innerHeight;
-    const window_w =window.innerWidth; // 获取窗口宽度
+    const vw =window.innerWidth; // 获取窗口宽度
     const s_t = $(this).scrollTop(); // 获取滚动条位置
 
     if (title.attr("changed") === "false") {
@@ -19,11 +19,10 @@ $(document).on("scroll", function() {
         tmp_h = title.height();
     }
 
-    tmp_w_center = window_w / 2 - tmp_w / 2;
+    tmp_w_center = vw / 2 - tmp_w / 2;
     tmp_h_center = vh / 2 - tmp_h / 2;
 
     scale=(1-(s_t/vh));
-    console.log("vh"+vh);
 
     changed_left = tmp_w_center * scale;
     changed_left = changed_left > 0 ? changed_left : 0;
