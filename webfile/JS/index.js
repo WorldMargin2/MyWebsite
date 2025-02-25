@@ -1,5 +1,6 @@
 $(document).ready(function() {
 
+alert(window.innerHeight,window.innerWidth);
 
 let tmp_w = 0;
 let tmp_h = 0;
