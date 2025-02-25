@@ -25,7 +25,9 @@ $(document).on("scroll", function() {
     scale=(1-(s_t/vh));
 
     changed_left = tmp_w_center * scale;
-    changed_left = changed_left > 0 ? changed_left : 0;
+    if(75*scale<=tmp_w){
+        changed_left > 0 ? changed_left : 0;
+    }
     changed_top = tmp_h_center*scale;
     changed_top = changed_top > 0 ? changed_top : 0;
     changed_font_size = 75*scale;

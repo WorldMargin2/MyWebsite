@@ -4,8 +4,14 @@
     overflow-x: visible;
 }
 
+
+
 html,body{
     overflow-x: hidden;
+}
+
+html{
+    overflow-y: scroll;
 }
 
 #background_canvas{
@@ -99,21 +105,7 @@ html,body{
 }
 
 
-@media screen and (max-width: 800px) {
-    .clock_container{
-        transform: scale(0.3) !important;
-        transform-origin: right top;
-    }
 
-    #title{
-        transform-origin: center center;
-        scale: 0.5;
-    }
-    
-    .white_space{
-        transform: rotateZ(45deg) scaleY(20) scaleX(1.2) !important;
-    }
-}
 
 @media screen and (max-aspect-ratio: 1/1) {
     .clock_container{
