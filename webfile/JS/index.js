@@ -10,8 +10,6 @@ $(document).on("scroll", function() {
     const vh=window.innerHeight;
     const vw =window.innerWidth; // 获取窗口宽度
     const s_t = $(this).scrollTop(); // 获取滚动条位置
-    console.log(s_t);
-    console.log(vh);
 
     if (title.attr("changed") === "false") {
         title.attr("changed", "true");
