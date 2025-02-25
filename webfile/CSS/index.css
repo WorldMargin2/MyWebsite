@@ -115,7 +115,7 @@ html,body{
     }
 }
 
-@media screen and (max-aspect-ratio: 0.6) {
+@media screen and (max-aspect-ratio: 1/1) {
     .clock_container{
         transform: scale(0.3) !important;
         transform-origin: right top;
