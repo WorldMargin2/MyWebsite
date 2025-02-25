@@ -27,7 +27,7 @@ class Sever:
         
     
     def start(self):
-        self.app.run("0.0.0.0",80)
+        self.app.run("0.0.0.0",80,debug=True)
 
 
     def getStatic(self):
