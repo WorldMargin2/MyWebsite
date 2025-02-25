@@ -114,7 +114,7 @@ html{
 @media screen and (max-aspect-ratio: 1/1) {
     .clock_container{
         transform: scale(0.5) !important;
-        transform-origin: right top;
+        transform-origin: top right;
     }
 
     #title{
@@ -131,10 +131,13 @@ html{
     padding-top: 30px;
     background-color: white;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 30px);
     margin: 0;
     left: 0;
     top: 0;
     z-index: 1;
     color: #FFF;
+}
+.about_me>h1{
+    text-shadow: #0F0F0F 0px 0px 10px;
 }
