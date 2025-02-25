@@ -25,6 +25,7 @@
     right: 0;
     border: #FFF solid 2px;
     color:#FFF;
+    transform: scale(1);
 }
 
 #clock span{

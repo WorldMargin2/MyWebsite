@@ -113,8 +113,8 @@ html{
 
 @media screen and (max-aspect-ratio: 1/1) {
     .clock_container{
-        transform: scale(0.3) !important;
-        transform-origin: right center;
+        transform: scale(0.5) !important;
+        transform-origin: right top;
     }
 
     #title{
@@ -123,7 +123,7 @@ html{
     }
     
     .white_space{
-        transform: rotateZ(45deg) scaleY(20) scaleX(1.2) !important;
+        transform: rotateZ(45deg) scaleY(20) scaleX(1.2);
     }
 }
 

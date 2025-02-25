@@ -46,7 +46,7 @@ $(document).on("scroll", function() {
     container.css("height",container_h+"px");
 
     clock_scale=scale>0.3?scale:0.3;
-    $(".clock_container").css("transform", "scale("+clock_scale+")");
+    $("#clock").css("transform", "scale("+clock_scale+")");
 
 });
 
