@@ -67,7 +67,7 @@ class Sever:
         def getLICENSESLIST():
             licenses=[]
             keys=("name","type","url")
-            with open(f"{LICENSESPATH}LICENSES.list") as file:
+            with open(f"{LICENSESPATH}licenses.list") as file:
                 for i in file.readlines():
                     i=i.strip("\n")
                     if(not i.startswith("#")and(i!="")):
