@@ -76,7 +76,7 @@ class Sever:
                                 keys,tuple(i.split("===="))
                             ))
                         )
-            return(render_template("LICENSES.html",licenses=licenses))
+            return(render_template("licenses.html",licenses=licenses))
 
         
     def main(self):
