@@ -1,5 +1,5 @@
 #program name====license====license file path
-
-clipboard.js====MIT License====../LICENSES/clipboard.js
-jquery.js====MIT License====../LICENSES/jquery.js
-jquery-ui.js====MIT License====../LICENSES/jquery-ui.js
+#regex :
+clipboard.js====MIT License====../LICENSES/clipboard.license
+jquery.js====MIT License====../LICENSES/jquery.license
+jquery-ui.js====MIT License====../LICENSES/jquery-ui.license

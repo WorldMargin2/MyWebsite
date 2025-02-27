@@ -69,9 +69,8 @@ class Sever:
             keys=("name","type","url")
             with open(f"{LICENSESPATH}LICENSES.list") as file:
                 for i in file.readlines():
-                    i.strip("\n")
-                    if(not i.startswith("#")):
-                        print(i[0].encode("utf-8"))
+                    i=i.strip("\n")
+                    if(not i.startswith("#")and(i!="")):
                         licenses.append(
                             dict(zip(
                                 keys,tuple(i.split("===="))
