@@ -9,25 +9,28 @@
 <body>
     {%include "header.html"%}
     <h1>Licenses</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>名称</th>
-                <th>类型</th>
-                <th>license链接</th>
-            </tr>
-        </thead>
-        <tbody>
-            
-            {%for i in licenses%}
+    <div class="table-container">
+        <table>
+            <thead>
                 <tr>
-                    <td>{{i.get('name')}}</td>
-                    <td>{{i.get('type')}}</td>
-                    <td><a href="{{i.get('url')}}">{{i.get('url')}}</a></td>
+                    <th>名称</th>
+                    <th>类型</th>
+                    <th>license链接</th>
                 </tr>
-            {%endfor%}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                
+                {%for i in licenses%}
+                    <tr>
+                        <td>{{i.get('name')}}</td>
+                        <td>{{i.get('type')}}</td>
+                        <td><a href="{{i.get('url')}}">{{i.get('url')}}</a></td>
+                    </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+    
     {%include "footer.html"%}
 </body>
 </html>
