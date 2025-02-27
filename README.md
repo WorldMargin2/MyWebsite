@@ -16,17 +16,18 @@ here are some exciting features of this project:
 ## Project Structure
 
 ```
-MyWebsite
 │  LICENSE
 │  main.py
 │  README.md
 │  severBase.py
 │
-└─ webfile
+└─webfile
    ├─CSS
    │      clock.css
    │      footer.css
+   │      header.css
    │      index.css
+   │      licenses.css
    │
    ├─HTML
    ├─ICON
@@ -42,10 +43,12 @@ MyWebsite
    │      jquery-ui.license
    │      jquery.license
    │      licenses.list
-   │      
+   │      mywebsite.license
+   │
    └─templates
            clock.html
            footer.html
+           header.html
            index-main-content.html
            index.html
            licenses.html
