@@ -17,21 +17,38 @@ here are some exciting features of this project:
 
 ```
 MyWebsite
-├── severBase.py
-├── main.py
-└── webfile
-    ├── HTML
-    │   ├── clock.html
-    │   └── index.html
-    ├── CSS
-    │   ├── clock.css
-    │   └── index.css
-    ├── JS
-    │   ├── clock.js
-    │   └── index.js
-    ├── templates
-    │   └── index.html
-    └── ICON
+│  LICENSE
+│  main.py
+│  README.md
+│  severBase.py
+│
+└─ webfile
+   ├─CSS
+   │      clock.css
+   │      footer.css
+   │      index.css
+   │
+   ├─HTML
+   ├─ICON
+   ├─JS
+   │      clipboard.js
+   │      clock.js
+   │      index.js
+   │      jquery-ui.js
+   │      jquery.js
+   │
+   ├─LICENSES
+   │      clipboard.license
+   │      jquery-ui.license
+   │      jquery.license
+   │      licenses.list
+   │      
+   └─templates
+           clock.html
+           footer.html
+           index-main-content.html
+           index.html
+           licenses.html
 ```
 
 

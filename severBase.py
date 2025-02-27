@@ -10,6 +10,7 @@ ICONPATH=f"{WEBFILEPATH}ICON/"
 IMAGEPATH=f"{WEBFILEPATH}images/"
 DATABASEPATH="./database/"
 HTMLPATH=f"{WEBFILEPATH}HTML/"
+LICENSESPATH=f"{WEBFILEPATH}LICENSES/"
 
 
 def readFile(file_path):
@@ -55,6 +56,29 @@ class Sever:
         @self.app.route("/HTML/<filename>")
         def getHTML(filename):
             return(readFile(f"{HTMLPATH}{filename}"))
+        
+        @self.app.route("/WebFile/LICENSES/<filename>")
+        @self.app.route("/LICENSES/<filename>")
+        def getLICENSES(filename):
+            return(readFile(f"{LICENSESPATH}{filename}"))
+        
+        #get license
+        @self.app.route("/licenses")
+        def getLICENSESLIST():
+            licenses=[]
+            keys=("name","type","url")
+            with open(f"{LICENSESPATH}LICENSES.list") as file:
+                for i in file.readlines():
+                    i.strip("\n")
+                    if(not i.startswith("#")):
+                        print(i[0].encode("utf-8"))
+                        licenses.append(
+                            dict(zip(
+                                keys,tuple(i.split("===="))
+                            ))
+                        )
+            return(render_template("LICENSES.html",licenses=licenses))
+
         
     def main(self):
         @self.app.route("/")

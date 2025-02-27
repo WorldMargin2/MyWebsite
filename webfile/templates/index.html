@@ -12,55 +12,19 @@
 <body>
     <canvas id="background_canvas"></canvas>
     <!-- 占位元素 -->
-    <div style="height: calc(100vh + 30px);width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
+    <div style="height: 100vh;width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
     <div id="container">
         <div class="white_space">
         </div>
         <div class="clock_container">
-            <div id="clock" style="transform-origin: top right;">
-                <div id="hour">
-                    <div class="show_num">
-                        <div class="ele1">00</div>
-                        <div class="ele3">01</div>
-                        <div class="ele4">01</div>
-                        <div class="ele2">00</div>
-                    </div>
-                    <div class="text">
-                        时
-                    </div>
-                </div>
-                <span>:</span>
-                <div id="minute">
-                    <div class="show_num">
-                        <div class="ele1">00</div>
-                        <div class="ele3">01</div>
-                        <div class="ele4">01</div>
-                        <div class="ele2">00</div>
-                    </div>
-                    <div class="text">
-                        分
-                    </div>
-                </div>
-                <span>:</span>
-                <div id="second">
-                    <div class="show_num">
-                        <div class="ele1">00</div>
-                        <div class="ele3">01</div>
-                        <div class="ele4">01</div>
-                        <div class="ele2">00</div>
-                    </div>
-                    <div class="text">
-                        秒
-                    </div>
-                </div>
-    
-            </div>
+            {%include 'clock.html'%}
         </div>
     </div>
     <h1 id="title" changed="false"><span>WorldMargin</span></h1>
-    <div class="about_me" >
-        <h1>关于我</h1>
+    <div>
+        {%include 'index-main-content.html'%}
     </div>
+    {%include 'footer.html'%}
 </body>
     <script src="../JS/index.js"></script>
     <script src="../JS/clock.js"></script>

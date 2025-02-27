@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Licenses</title>
+</head>
+<body>
+    <h1>Licenses</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>名称</th>
+                <th>类型</th>
+                <th>license链接</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            {%for i in licenses%}
+                <tr>
+                    <td>{{i.get('name')}}</td>
+                    <td>{{i.get('type')}}</td>
+                    <td><a href="{{i.get('url')}}">{{i.get('url')}}</a></td>
+                </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+    <ul>
+    
+</body>
+</html>

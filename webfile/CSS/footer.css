@@ -1,0 +1,12 @@
+footer{
+    display: flex;
+}
+
+footer a{
+    text-decoration: none;
+    color: gray;
+    font-size: 1.2rem;
+    margin: 0 1rem;
+    transition: 0.3s;
+}
+
