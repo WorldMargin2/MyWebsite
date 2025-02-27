@@ -16,6 +16,7 @@ here are some exciting features of this project:
 ## Project Structure
 
 ```
+MYWEBSITE
 │  LICENSE
 │  main.py
 │  README.md
@@ -52,6 +53,8 @@ here are some exciting features of this project:
            index-main-content.html
            index.html
            licenses.html
+           readLicense.html
+
 ```
 
 
