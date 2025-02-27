@@ -106,6 +106,7 @@ html{
     flex-direction: row-reverse;
     transform-origin: right top;
     width: 100%;
+    --clock-height: 100px !important;
 }
 
 

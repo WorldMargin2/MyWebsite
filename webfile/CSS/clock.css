@@ -1,12 +1,17 @@
-#clock *{
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-drag: none;
-    transition: all 0s;
+
+:root {
+    --clock-height: 50px;
 }
 
+#clock {
+    width: var(--clock-width, calc(var(--clock-height) * 1));
+    height: var(--clock-height);
+}
+
+#clock:root {
+    width: var(--clock-width, calc(var(--clock-height) * 1));
+    height: var(--clock-height);
+}
 
 #clock{
     display: flex;
@@ -17,10 +22,9 @@
     align-items: center;
     border-radius: 5px;
     padding: 5px;
-    min-width: 400px;
-    max-width: 400px;
-    width: max-content;
-    height: 150px;
+    height: var(--clock-height);
+    
+    width: var(--clock-width, calc(var(--clock-height) * 3));
     bottom: 0;
     right: 0;
     border: #FFF solid 2px;
@@ -28,8 +32,17 @@
     transform: scale(1);
 }
 
+#clock *{
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+    transition: all 0s;
+}
+
 #clock span{
-    font-size: 40px;
+    font-size: calc(var(--clock-height) / 3);
     font-weight: bolder;
     transform: translateY(-40%);
 }
@@ -53,9 +66,10 @@
 
 #clock .show_num{
     position: relative;
-    perspective: 200px;
+    perspective: calc(var(--clock-height) * 1.5);
     width: 100%;
     height: 80%;
+    font-size: calc(var(--clock-height) / 3);
 }
 
 #clock .show_num>div{
@@ -66,7 +80,6 @@
     width: 100%;
     height: 100%;
     color: white;
-    font-size: 50px;
     text-align: center;
     border-radius: 5px;
 }
@@ -95,7 +108,7 @@
     bottom: 0;
     height: 20%;
     color: white;
-    font-size: 20px;
+    font-size: calc(var(--clock-height) / 6);
     text-align: center;
     border-radius: 0 0 5px 5px;
 }
