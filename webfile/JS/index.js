@@ -7,6 +7,7 @@ let tmp_h = 0;
 let tmp_w_center = 0;
 let tmp_h_center = 0;
 let scale;
+let tmp_clock_h=0;
 
 $(document).on("scroll", function() {
     const title = $("#title");
@@ -20,6 +21,7 @@ $(document).on("scroll", function() {
         title.css("height", "max-content");
         tmp_w = title.width();
         tmp_h = title.height();
+        tmp_clock_h= $("#clock").height();
     }
 
     tmp_w_center = vw / 2 - tmp_w / 2;
@@ -48,8 +50,9 @@ $(document).on("scroll", function() {
     container_h=container_h>35?container_h:35;
     container.css("height",container_h+"px");
 
-    clock_scale=scale>0.3?scale:0.3;
-    $("#clock").css("transform", "scale("+clock_scale+")");
+    clock_height=tmp_clock_h*scale > 30 ? tmp_clock_h*scale : 30;
+    clock=$("#clock");
+    clock.css("--clock-height", clock_height+"px");
 
 });
 
