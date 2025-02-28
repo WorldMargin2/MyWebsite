@@ -4,7 +4,7 @@ footer{
     position: absolute;
     z-index: 4;
     bottom: 0;
-    background-color: #f5f5f5;
+    background-color: rgba(245, 245, 245,0.85);
     justify-content: center;
     align-items: center;
     padding: 1rem 0;
