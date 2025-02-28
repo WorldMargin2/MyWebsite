@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="WorldMargin.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.5175781"
+     inkscape:cx="180.55084"
+     inkscape:cy="284.33462"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer3" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect1"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,4.7947233,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 1">
+    <g
+       id="g5"
+       transform="translate(5)">
+      <g
+         id="g4"
+         transform="matrix(-1,0,0,1,440,0)">
+        <path
+           id="rect3-8"
+           style="fill:#00ffff"
+           d="M 50,100 H 90 V 400 H 50 Z"
+           transform="translate(150)" />
+        <path
+           id="rect3-3-7"
+           style="fill:#00ffff"
+           d="M 90,100 H 50 l 150,300 h 40 z"
+           sodipodi:nodetypes="ccccc"
+           transform="translate(150)" />
+        <path
+           id="rect3"
+           style="fill:#00ffff"
+           d="M 50,100 H 90 V 400 H 50 Z" />
+        <path
+           id="rect3-3"
+           style="fill:#00ffff"
+           d="M 90,100 H 50 l 150,300 h 40 z"
+           sodipodi:nodetypes="ccccc" />
+      </g>
+      <g
+         id="g4-6"
+         transform="matrix(1,0,0,-1,50,500)"
+         style="fill:#0000ff">
+        <path
+           id="rect3-8-0"
+           style="fill:#0000ff"
+           d="M 50,100 H 90 V 400 H 50 Z"
+           transform="translate(150)" />
+        <path
+           id="rect3-3-7-2"
+           style="fill:#0000ff"
+           d="M 90,100 H 50 l 150,300 h 40 z"
+           sodipodi:nodetypes="ccccc"
+           transform="translate(150)" />
+        <path
+           id="rect3-4"
+           style="fill:#0000ff"
+           d="M 50,100 H 90 V 400 H 50 Z" />
+        <path
+           id="rect3-3-8"
+           style="fill:#0000ff"
+           d="M 90,100 H 50 l 150,300 h 40 z"
+           sodipodi:nodetypes="ccccc" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -8,7 +8,6 @@
 </head>
 <body>
     {%include "header.html"%}
-    <h1>Licenses</h1>
     <div class="table-container">
         <table>
             <thead>
@@ -24,7 +23,10 @@
                     <tr>
                         <td>{{i.get('name')}}</td>
                         <td>{{i.get('type')}}</td>
-                        <td><a href="{{i.get('url')}}">{{i.get('url')}}</a></td>
+                        <td>
+                            <a href="{{i.get('url')}}">查看</a>
+                            <a download="{{i.get('name')}}-license" href="{{i.get('url')}}/download">下载</a>
+                        </td>
                     </tr>
                 {%endfor%}
             </tbody>

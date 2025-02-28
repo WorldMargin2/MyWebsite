@@ -32,6 +32,10 @@ class Sever:
 
 
     def getStatic(self):
+        @self.app.route("/favicon.ico")
+        def getfavicon():
+            return(readFile(f"{ICONPATH}WorldMargin.ico"))
+
         @self.app.route("/WebFile/JS/<filename>")
         @self.app.route("/JS/<filename>")
         def getJS(filename):
@@ -62,6 +66,18 @@ class Sever:
         def getLICENSES(filename):
             return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r").read()))
         
+        @self.app.route("/WebFile/LICENSES/<filename>/download")
+        @self.app.route("/LICENSES/<filename>/download")
+        def downloadLICENSES(filename):
+            # return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r").read()))
+            return(open(f"{LICENSESPATH}{filename}","r").read())
+
+    def main(self):
+
+        @self.app.route("/")
+        def main():
+            return(render_template("index.html"))
+        
         #get license
         @self.app.route("/licenses")
         def getLICENSESLIST():
@@ -78,10 +94,6 @@ class Sever:
                         )
             return(render_template("licenses.html",licenses=licenses))
 
-        
-    def main(self):
-        @self.app.route("/")
-        def main():
-            return(render_template("index.html"))
+
         
 
