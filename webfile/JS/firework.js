@@ -198,8 +198,8 @@ $(document).ready(() => {
             speed: 150,
             life_time: 3,
             explode_time: 2,
-            explode_particles: 100,
-            wake_particles: 100,
+            explode_particles: 75,
+            wake_particles: 75,
             radius: 1.5
 
         }
