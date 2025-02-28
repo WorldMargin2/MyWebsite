@@ -191,17 +191,16 @@ $(document).ready(() => {
     canvas.height = window.innerHeight
     ctx.setTransform(1, 0, 0, -1, 0, canvas.height);
 
-    fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 5,
+    fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 3,
         {
-            frameRate: 120,
-            gravity: 50,
-            speed: 150,
+            frameRate: 60,
+            gravity: 30,
+            speed: 125,
             life_time: 3,
             explode_time: 2,
             explode_particles: 75,
             wake_particles: 100,
             radius: 1.5
-
         }
     );
     var visiable = true;
@@ -221,5 +220,5 @@ $(document).ready(() => {
         if(visiable){
             fireworks.addRandomFirework();
         }
-    }, 2000);
+    }, Math.random() * 1000 + 1500);
 });
