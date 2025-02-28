@@ -193,13 +193,13 @@ $(document).ready(() => {
 
     fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 5,
         {
-            frameRate: 144,
+            frameRate: 120,
             gravity: 50,
             speed: 150,
             life_time: 3,
             explode_time: 2,
             explode_particles: 75,
-            wake_particles: 75,
+            wake_particles: 100,
             radius: 1.5
 
         }
