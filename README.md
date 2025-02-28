@@ -32,9 +32,15 @@ MYWEBSITE
    │
    ├─HTML
    ├─ICON
+   │      github.png
+   │      WorldMargin.ico
+   │      WorldMargin.png
+   │      WorldMargin.svg
+   │
    ├─JS
    │      clipboard.js
    │      clock.js
+   │      firework.js
    │      index.js
    │      jquery-ui.js
    │      jquery.js

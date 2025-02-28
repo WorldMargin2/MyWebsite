@@ -20,16 +20,43 @@
     flex-wrap: nowrap;
     justify-content: center;
     align-items: center;
-    border-radius: 5px;
     padding: 5px;
     height: var(--clock-height);
-    
     width: var(--clock-width, calc(var(--clock-height) * 3));
     bottom: 0;
     right: 0;
-    border: #FFF solid 2px;
     color:#FFF;
     transform: scale(1);
+}
+
+#clock::before{
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -3px;
+    width: 3px;
+    height: 10%;
+    background-color: #00F;
+    border-radius: 3px;
+    z-index: 4;
+    animation: clock_before_anim 0.8s 0s forwards;
+}
+
+@keyframes clock_before_anim{
+    0%{
+        top: -100%;
+        height: 10%;
+        width: 3px;
+    }25%{
+        top: 36%;
+        width: 4px;
+    }75%{
+        height: 60%;
+    }100%{
+        top: 20%;
+        width: 3px;
+        height: 60%;
+    }
 }
 
 #clock *{
@@ -81,7 +108,7 @@
     height: 100%;
     color: white;
     text-align: center;
-    border-radius: 5px;
+    border-radius: calc(var(--clock-height) / 30) calc(var(--clock-height) / 30) 0 0;
 }
 
 #clock .ele1{
@@ -110,7 +137,8 @@
     color: white;
     font-size: calc(var(--clock-height) / 6);
     text-align: center;
-    border-radius: 0 0 5px 5px;
+    border-radius: 0 0 calc(var(--clock-height) / 30) calc(var(--clock-height) / 30);
+
 }
 
 #clock .ele2.show_back{

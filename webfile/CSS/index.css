@@ -16,6 +16,7 @@ html{
 
 
 body{
+    z-index: -1;
     position: relative;
 }
 
@@ -23,10 +24,10 @@ body{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: -100;
-    width: 100%;
-    height: 100%;
-    /* background-color: black; */
+    z-index: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
 }
 
 
@@ -36,11 +37,13 @@ body{
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 1;
     align-content: center;
-    background-color: rgb(3, 3, 3);
+    background-color: transparent;
     width: 100%;
     height: 100vh;
     overflow: hidden;
+    border-bottom: #0FF solid 1px;
 }
 
 #container>.white_space{
@@ -69,6 +72,7 @@ body{
 
 #title{
     position: fixed;
+    z-index: 3;
     top: 0;
     left: 0;
     align-content: center;
@@ -109,7 +113,7 @@ body{
     display: flex;
     position: relative;
     flex-direction: row-reverse;
-    transform-origin: right top;
+    transform-origin: center center;
     width: 100%;
     --clock-height: 100px !important;
 }
@@ -120,7 +124,7 @@ body{
 @media screen and (max-aspect-ratio: 1/1) {
     .clock_container{
         transform: scale(0.5) !important;
-        transform-origin: top right;
+        transform-origin: right center;
     }
 
     #title{
@@ -135,13 +139,13 @@ body{
 
 .about_me{
     padding-top: 30px;
-    background-color: white;
+    background-color: transparent;
     width: 100vw;
     height: calc(100vh - 30px);
     margin: 0;
     left: 0;
     top: 0;
-    z-index: 1;
+    z-index: -1;
     color: #FFF;
 }
 .about_me>h1{
