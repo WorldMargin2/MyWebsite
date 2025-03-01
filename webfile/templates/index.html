@@ -13,16 +13,16 @@
 <body>
     <canvas id="background_canvas"></canvas>
     <!-- 占位元素 -->
-    <div style="height: 100vh;width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
     <div id="container">
+        <h1 id="title" changed="false"><span>WorldMargin</span></h1>
         <div class="white_space">
         </div>
         <div class="clock_container">
             {%include 'clock.html'%}
         </div>
     </div>
-    <h1 id="title" changed="false"><span>WorldMargin</span></h1>
-    <div>
+    <div class="main_content">
+        <div style="height: 100vh;width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
         {%include 'index-main-content.html'%}
     </div>
     {%include 'footer.html'%}

@@ -37,7 +37,7 @@ body{
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 2;
     align-content: center;
     background-color: transparent;
     width: 100%;
@@ -137,18 +137,7 @@ body{
     }
 }
 
-.about_me{
-    padding-top: 30px;
-    background-color: transparent;
-    width: 100vw;
-    height: calc(100vh - 30px);
-    margin: 0;
-    left: 0;
-    top: 0;
-    z-index: -1;
-    color: #FFF;
-}
-.about_me>h1{
-    text-shadow: #0F0F0F 0px 0px 10px;
+footer{
+    position: relative !important;
 }
 

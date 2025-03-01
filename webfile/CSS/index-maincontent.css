@@ -1,0 +1,16 @@
+.main_content{
+    z-index: -1;
+    width: 100vw;
+    height: max-content;
+}
+
+.about_me{
+    padding-top: 30px;
+    background-color: transparent;
+    width: 100vw;
+    height: calc(100vh - 30px);
+    margin: 0;
+    left: 0;
+    top: 0;
+    color: #FFF;
+}
