@@ -36,7 +36,7 @@
     left: -3px;
     width: 3px;
     height: 10%;
-    background-color: #00F;
+    background-color: #FFF;
     border-radius: 3px;
     z-index: 4;
     animation: clock_before_anim 0.8s 0s forwards;
@@ -44,12 +44,14 @@
 
 @keyframes clock_before_anim{
     0%{
-        top: -100%;
+        top: -20%;
         height: 10%;
         width: 3px;
     }25%{
-        top: 36%;
+        top: 40%;
         width: 4px;
+    }50%{
+        height: 70%;
     }75%{
         height: 60%;
     }100%{
