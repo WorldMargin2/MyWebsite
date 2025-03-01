@@ -2,6 +2,8 @@ from functools import wraps
 from flask import Flask,jsonify,render_template,redirect
 from flask import request, session,url_for,abort,send_file,flash,get_flashed_messages
 from flask_wtf.csrf import CSRFProtect
+from importLib.manageDatabase import *
+from importLib.forms import *
 
 WEBFILEPATH="./webfile/"
 JSPATH=f"{WEBFILEPATH}JS/"
@@ -11,8 +13,15 @@ IMAGEPATH=f"{WEBFILEPATH}images/"
 DATABASEPATH="./database/"
 HTMLPATH=f"{WEBFILEPATH}HTML/"
 LICENSESPATH=f"{WEBFILEPATH}LICENSES/"
+ARTICLEPATH=f"{WEBFILEPATH}ARTICLES/"
 
 
+@wraps
+def checkLogin(func):  # 装饰器，用于检查用户是否登录,使用cookie
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        pass
+        
 def readFile(file_path):
     with open(file_path,"rb") as file:
         return(file.read())
@@ -22,7 +31,9 @@ class Sever:
         self.app=Flask(__name__,template_folder=f"{WEBFILEPATH}templates")
         self.app.config["SECRET_KEY"]="SOCITY"
         self.csrf=CSRFProtect(self.app)
+        self.userDB=UserDB()
         self.getStatic()
+        self.handle_event()
         self.main()
         self.start()
         
@@ -93,6 +104,45 @@ class Sever:
                             ))
                         )
             return(render_template("licenses.html",licenses=licenses))
+        
+        @self.app.route("/article")
+        def getArticlePage():
+            return(render_template("article.html"))
+        
+        @self.app.route("/admin",methods=["GET","POST"])
+        def admin():
+            #要注意token
+            form=AdminLoginForm()
+            if(form.validate_on_submit()):
+                if(self.userDB.login(form.admin_name.data,form.password.data)):
+                    return(redirect("/"))
+                else:
+                    return(render_template("login.html",form=form,login_errors=["用户名或密码错误"]))
+            return(render_template("login.html",form=form))
+        
+        @self.check_login
+        @self.app.route("/admin/logout")
+        def logout():
+            self.userDB.logout(request.cookies)
+            return(redirect("/admin"))
+            
+
+
+    def handle_event(self):
+        @wraps
+        def check_login(f):
+            @wraps(f)
+            def decorated_function(*args, **kwargs):
+                if(self.userDB.check_longin(request.cookies)):
+                    return(f(*args, **kwargs))
+                else:
+                    return(redirect("/admin"))
+            return(decorated_function)
+        self.check_login=check_login
+    
+
+        
+        
 
 
         

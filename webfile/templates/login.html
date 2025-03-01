@@ -1,0 +1,30 @@
+<!-- <!DOCTYPE html> -->
+<html lang="zh-cn">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8">
+        <title>登录</title>
+        <style></style>
+        <link rel="stylesheet" href="CSS/login.css" type="text/css">
+        <script src="JS/jquery.js"></script>
+        <script src="JS/index.js"></script>
+    </head>
+    <body>
+        {%include "header.html"%}
+        <formarea>
+            <h2>管理员登录</h2>
+            <form method="POST" action="">
+                {{form.csrf_token()}}
+                {{form.admin_name}}
+                {{form.password}}
+                {{form.submit}}
+            </form>
+            {%for i in login_errors %}
+                <span style="color:red">{{i}}</span>
+            {%endfor%}
+        </formarea>
+        {%include "footer.html"%}
+    </body>
+</html>
+
+

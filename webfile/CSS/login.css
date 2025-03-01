@@ -1,0 +1,112 @@
+*{
+    padding: 0;
+    margin: 0;
+    outline: 0;
+    border: 0;
+}
+
+body{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: darkcyan;
+}
+
+formarea{
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    height: 60%;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-content: center;
+    background-color: white;
+    border-radius: 10px;
+    opacity: 0;
+    /* animation: showForm 0.5s linear 0 1 normal forwards; */
+    animation-name: showForm;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    filter: blur(3px);
+    
+}
+
+@keyframes showForm{
+    0%{
+        filter: blur(3px);
+        opacity: 0;
+        top: 40%;
+    }100%{
+        filter: none;
+        opacity: 1;
+        top: 20%;
+    }
+}
+
+h2{
+    user-select: none;
+    position: absolute;
+    top: 5%;
+    color: aqua;
+    margin-bottom: 20px;
+}
+
+form{
+    width: 100%;
+    display: flex;
+    flex-direction: column;    
+    justify-content: center;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+}
+
+input[type="text"],
+input[type="password"]{
+    font-family: "Microsoft soft";
+}
+input[type="text"]::selection,
+input[type="password"]::selection{
+    background-color: rgba(0, 255, 255,0.6);
+}
+input{
+    font-size: 20px;
+    margin-bottom: 20px;
+    outline-style: none ;
+    border: 1px solid #ccc; 
+    border-radius: 3px;
+    padding: 6px;
+    width: 60%;
+    transition: all 0.5s;
+    caret-color: aqua;
+    color: gray;
+}
+input:focus{
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6)
+}
+
+
+
+
+input[type="submit"]{
+    padding-left: 10px;
+    padding-right: 10px;
+    width: auto;
+    color: gray;
+    background-color: transparent;
+    font-weight: 700;
+    /* background-color: aqua; */
+}
+
+input[type="submit"]:hover{
+    transform: scale(1.1);
+    transition: all 0.5s;
+}
+
