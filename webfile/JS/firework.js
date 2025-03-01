@@ -28,11 +28,10 @@ class Particle {
     };
     update() {
         if (this.now_life >= (this.life_time * this.arg.frameRate)) {
-            if ((this.arg.life_time_callback)&&(this.type == "l")) {
-                this.arg.life_time_callback(this.arg.x, this.arg.y);
-            };
             if(this.type == "e") {
                 this.ease_out();
+            }else if (this.type == "l") {
+                this.arg.life_time_callback?this.arg.life_time_callback(this.arg.x, this.arg.y):0;
             };
             return;
         };
