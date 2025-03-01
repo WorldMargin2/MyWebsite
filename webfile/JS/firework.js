@@ -1,31 +1,32 @@
 const args_template = {
-    ctx: null,
-    color: "black",
-    color_random: false,
-    frameRate: 60,
-    life_time: 2 ,
-    explode_time: 1 , // 完整生命周期 = life_time + explode_time
-    wake_particles: 20,
-    explode_particles: 100, // 爆炸后产生的粒子数量
-    angle: 90,
-    speed: 2,
-    gravity: 1,
-    x: 0,
-    y: 0,
-    life_time_callback: null,
-    radius: 1
+    ctx: null,                  //canvas上下文(canvas context)
+    color: "black",             //粒子颜色(particle color)
+    color_random: false,        //是否启用随机颜色(random color)
+    frameRate: 60,              //帧率(frame rate)
+
+    life_time: 2 ,              // 发射时长(life time of launch)
+    explode_time: 1 ,           // 爆炸(life time of explode) 
+                                // 完整生命周期(the life time of complete)= (life_time + explode_time + ( wake_particles/frameRate ))s 
+    wake_particles: 20,         // 尾迹数量(number of wake particles)
+    explode_particles: 100,     // 爆炸后产生的粒子数量(number of particles after explode)
+    angle: 90,                  // 发射角度(angle of launch)
+    speed: 2,                   // 发射速度(speed of launch)
+    gravity: 1,                 // 重力(gravity)
+    x: 0,                       // 发射点x坐标(x coordinate of launch point)
+    y: 0,                       // 发射点y坐标(y coordinate of launch point)
+    life_time_callback: null,   // 发射结束回调(callback when launch is over)
+    radius: 1                   // 粒子半径(radius of particle)
 };
 
 class Particle {
     wakes = []; // [x, y]
     now_life = 0;
-    constructor(arg,type="e"? "e":"l") {
+    constructor(arg={},type="e"? "e":"l") {// e:爆炸 l:发射
         this.arg = arg;
-        this.life_time = arg.life_time;
-        this.type = type; // e:爆炸 l:发射
+        this.life_time = type=="l"? arg.life_time:arg.explode_time;
+        this.type = type;
     };
     update() {
-        //计算执行时间
         if (this.now_life >= (this.life_time * this.arg.frameRate)) {
             if ((this.arg.life_time_callback)&&(this.type == "l")) {
                 this.arg.life_time_callback(this.arg.x, this.arg.y);
@@ -100,9 +101,8 @@ class Firework {
         if (this.now_life == 0) {
             this.now_life++;
             let arg = { ...this.arg };
-            let $this = this;
-            arg.life_time_callback = function(x,y) {
-                $this.explode(x,y);
+            arg.life_time_callback = (x,y)=> {
+                this.explode(x,y);
             };
             this.particles.push(new Particle(arg,"l"));
         };
@@ -112,13 +112,11 @@ class Firework {
     };
     explode(x,y) {
         this.particles = [];
-        let $this = this;
         for (let i = 0; i < this.arg.explode_particles; i++) {
             let arg = { ...this.arg };
             if (i == 0) {
-                arg.life_time_callback = ()=>{ $this.particles = []; $this.end_callback($this); };
+                arg.life_time_callback = ()=>{ this.particles = []; this.end_callback(this); };
             };
-            arg.life_time = this.arg.explode_time;
             let angle = (360 / this.arg.explode_particles)*i + Math.random() * 2;
             arg.angle = angle;
             arg.speed = this.arg.speed*(Math.random()*(Math.random() +0.8) );
@@ -135,90 +133,110 @@ class Firework {
 };
 
 class FireworkCanvas {
-    fireworks = [];
-    ctx = null;
-    gravity = 0;
-    frameRate = 60;
-    interval = null;
+    #started = false;
+    #auto_resize = false;
+    #fireworks = [];
+    #width = 0;
+    #height = 0;
+    #ctx = null;
+    #interval = null;
+    #max_fireworks = 0;
+    #args = {};
     constructor(ctx, width, height,  max_fireworks = 10,args = {}) {
-        this.ctx = ctx;
-        this.width = width;
-        this.height = height;
-        this.max_fireworks = max_fireworks; // 最大并行更新烟花数量
-        this.args = {...args_template,...args};
+        this.#ctx = ctx;
+        this.#width = width;
+        this.#height = height;
+        this.#max_fireworks = max_fireworks; // 最大并行更新烟花数量
+        this.#args = {...args_template,...args};
     };
+
     addFirework(arg) {
-        arg = { ...this.args, ...arg };
-        this.fireworks.push(new Firework(arg,(firework) => {
-            this.fireworks.splice(this.fireworks.indexOf(firework), 1);
+        if(!this.#started) {
+            return;
+        };
+        arg = { ...this.#args, ...arg };
+        this.#fireworks.push(new Firework(arg,(firework) => {
+            this.#fireworks.splice(this.#fireworks.indexOf(firework), 1);
         }));
     };
+
     addRandomFirework() {
         let arg = {};
-        arg.ctx = this.ctx;
-        arg.x = Math.random() * this.width;
+        arg.ctx = this.#ctx;
+        arg.x = Math.random() * this.#width;
         arg.color = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
         this.addFirework(arg);
     };
-    mainLoop($this) {
-        $this.ctx.clearRect(0, 0, $this.width, $this.height);
-        for (let i = 0; i < $this.fireworks.length; i++) {
-            $this.fireworks[i].update();
+
+    is_running() {
+        return (this.#started==true);
+    };
+
+    #mainLoop() {
+        if(!this.#started) {
+            return;
         };
-        if ($this.fireworks.length > $this.max_fireworks*2) {
-            $this.fireworks = $this.fireworks.slice(0, $this.max_fireworks);
+        this.#ctx.clearRect(0, 0, this.#width, this.#height);
+        for (let i = 0; i < this.#fireworks.length; i++) {
+            this.#fireworks[i].update();
+        };
+        if (this.#fireworks.length > this.#max_fireworks*2) {
+            this.#fireworks = this.#fireworks.slice(0, this.#max_fireworks);
         };
     };
+
     start() {
-        let $this = this;
-        this.interval = setInterval(function() {
-            $this.mainLoop($this);
-        }, 1000 / this.args.frameRate);
+        if (this.#started) {
+            return;
+        };
+        this.#started = true;
+        this.#interval = setInterval(()=> {
+            this.#mainLoop(this);
+        }, 1000 / this.#args.frameRate);
     };
+
     stop() {
-        clearInterval(this.interval);
+        if (!this.#started) {
+            return;
+        };
+        clearInterval(this.#interval);
+        this.#started = false;
     };
+
+    updateSize(canvas,element) {
+        this.#width = element.innerWidth;
+        this.#height = element.innerHeight;
+        canvas.width = element.innerWidth;
+        canvas.height = element.innerHeight;
+        this.#ctx.setTransform(1,0,0,-1,0,canvas.height);
+    };
+
+    autoResize(canvas,element=window) {
+        if(this.#auto_resize) {
+            return;
+        }
+        this.#auto_resize = true;
+        window.addEventListener('resize',()=>{
+            this.updateSize(canvas,element);
+        } );
+    };
+
+    stopAutoResize() {
+        if(!this.#auto_resize) {
+            return;
+        }
+        this.#auto_resize = false;
+        window.removeEventListener('resize',()=>{
+            this.updateSize(canvas,element);
+        } );
+    };
+
+    setArgs(arg) {
+        this.#args = { ...this.#args, ...arg };
+    }
+
+    setMaxFireworks(max) {
+        this.#max_fireworks = max;
+    }
 };
 
-let fireworks;
-
-$(document).ready(() => {
-    let canvas = document.getElementById("background_canvas");
-    let ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight
-    ctx.setTransform(1, 0, 0, -1, 0, canvas.height);
-
-    fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 3,
-        {
-            frameRate: 60,
-            gravity: 30,
-            speed: 125,
-            life_time: 3,
-            explode_time: 2,
-            explode_particles: 75,
-            wake_particles: 100,
-            radius: 1.5
-        }
-    );
-    var visiable = true;
-    $(document).on("visibilitychange", function() {
-        if (document.hidden) {
-            fireworks.stop();
-            visiable = false;
-        } else {
-            if (!visiable) {
-                fireworks.start();
-                visiable = true;
-            };
-        };
-    });
-    fireworks.start();
-    setInterval(() => {
-        if(visiable){
-            fireworks.addRandomFirework();
-        }
-    }, Math.random() * 1000 + 1500);
-});

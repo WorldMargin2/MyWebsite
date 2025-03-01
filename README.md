@@ -41,6 +41,7 @@ MYWEBSITE
    │      clipboard.js
    │      clock.js
    │      firework.js
+   │      firework-init.js
    │      index.js
    │      jquery-ui.js
    │      jquery.js
@@ -49,8 +50,9 @@ MYWEBSITE
    │      clipboard.license
    │      jquery-ui.license
    │      jquery.license
-   │      licenses.list
+   │      firework.license
    │      mywebsite.license
+   │      licenses.list
    │
    └─templates
            clock.html
