@@ -1,6 +1,6 @@
 {%block footer%}
 
-    <link rel="stylesheet" href="../CSS/footer.css">
+    <link rel="stylesheet" type="text/css" href="../CSS/footer.css">
     <footer>
         <span>
             <a href="../licenses">开源许可证</a>
@@ -19,6 +19,12 @@
             </a>
             开源
         </span>
+
+        {%if ("admin" not in request.url) %}
+        <span>
+            <a href="/admin/login">管理员登录</a>
+        </span>
+        {%endif%}
 
     </footer>
 

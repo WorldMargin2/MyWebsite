@@ -1,11 +1,11 @@
-<!-- <!DOCTYPE html> -->
 <html lang="zh-cn">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="UTF-8">
+        <base href="../">
         <title>登录</title>
         <style></style>
-        <link rel="stylesheet" href="CSS/login.css" type="text/css">
+        <link rel="stylesheet" type="text/css" href="CSS/login.css" type="text/css">
         <script src="JS/jquery.js"></script>
         <script src="JS/index.js"></script>
     </head>
@@ -19,7 +19,7 @@
                 {{form.password}}
                 {{form.submit}}
             </form>
-            {%for i in login_errors %}
+            {%for i in errors %}
                 <span style="color:red">{{i}}</span>
             {%endfor%}
         </formarea>

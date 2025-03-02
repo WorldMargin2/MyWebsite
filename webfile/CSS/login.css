@@ -14,8 +14,8 @@ body{
 
 formarea{
     top: 20%;
-    left: 30%;
-    width: 40%;
+    left: 25%;
+    width: 50%;
     height: 60%;
     position: absolute;
     display: flex;
@@ -33,6 +33,13 @@ formarea{
     animation-fill-mode: forwards;
     filter: blur(3px);
     
+}
+
+@media screen and (max-width: 800px) {
+    formarea{
+        width: 80%;
+        left: 10%;
+    }
 }
 
 @keyframes showForm{

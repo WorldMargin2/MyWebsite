@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Flask,jsonify,render_template,redirect
+from flask import Flask,jsonify,render_template,redirect,make_response
 from flask import request, session,url_for,abort,send_file,flash,get_flashed_messages
 from flask_wtf.csrf import CSRFProtect
 from importLib.manageDatabase import *
@@ -16,11 +16,6 @@ LICENSESPATH=f"{WEBFILEPATH}LICENSES/"
 ARTICLEPATH=f"{WEBFILEPATH}ARTICLES/"
 
 
-@wraps
-def checkLogin(func):  # 装饰器，用于检查用户是否登录,使用cookie
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        pass
         
 def readFile(file_path):
     with open(file_path,"rb") as file:
@@ -32,8 +27,8 @@ class Sever:
         self.app.config["SECRET_KEY"]="SOCITY"
         self.csrf=CSRFProtect(self.app)
         self.userDB=UserDB()
-        self.getStatic()
         self.handle_event()
+        self.getStatic()
         self.main()
         self.start()
         
@@ -93,7 +88,7 @@ class Sever:
         @self.app.route("/licenses")
         def getLICENSESLIST():
             licenses=[]
-            keys=("name","type","url")
+            keys=("name","type","url","open_source_url")
             with open(f"{LICENSESPATH}licenses.list") as file:
                 for i in file.readlines():
                     i=i.strip("\n")
@@ -109,41 +104,58 @@ class Sever:
         def getArticlePage():
             return(render_template("article.html"))
         
-        @self.app.route("/admin",methods=["GET","POST"])
-        def admin():
-            #要注意token
-            form=AdminLoginForm()
-            if(form.validate_on_submit()):
-                if(self.userDB.login(form.admin_name.data,form.password.data)):
-                    return(redirect("/"))
-                else:
-                    return(render_template("login.html",form=form,login_errors=["用户名或密码错误"]))
-            return(render_template("login.html",form=form))
+        @self.app.route("/admin")
+        @self.checklogin
+        def getAdminPage():
+            return(render_template("admin.html"))
         
-        @self.check_login
         @self.app.route("/admin/logout")
-        def logout():
-            self.userDB.logout(request.cookies)
-            return(redirect("/admin"))
-            
+        @self.checklogin
+        def admin_logout():
+            response = make_response(redirect("/admin/login"))
+            for i in self.userDB.clear_refuse():
+                response.set_cookie(i[0], "", expires=0)
+            response.set_cookie("admin_name", "", expires=0)
+            response.set_cookie(self.userDB.get_config("password_key"), "", expires=0)
+            return response
+        
+        @self.app.route("/admin/login",methods=["GET","POST"])
+        def admin_login():
+            if(self.userDB.check_longin(request.cookies)):
+                return(redirect("/admin"))
+            errors = []
+            err=request.args.get("error")
+            if err:
+                errors.append(err)
+            form = AdminLoginForm()
+            if form.validate_on_submit():
+                login_result = self.userDB.login(form.admin_name.data, form.password.data, request.remote_addr)
+                if login_result:
+                    response = make_response(redirect("/admin"))
+                    for key, value in login_result.items():
+                        print(key, value)
+                        response.set_cookie(key, value, max_age=60 * 60 * 24 * 7)
+                    return response
+                else:
+                    errors.append("用户名或密码错误")
+            return render_template("login.html", form=form, errors=errors)
 
 
     def handle_event(self):
-        @wraps
-        def check_login(f):
+        def checklogin_decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
                 if(self.userDB.check_longin(request.cookies)):
                     return(f(*args, **kwargs))
                 else:
-                    return(redirect("/admin"))
+                    return(redirect(url_for("admin_login",error="未登录")))
             return(decorated_function)
-        self.check_login=check_login
-    
-
-        
-        
+        self.checklogin=checklogin_decorator
 
 
-        
+
+
+
+
+
 
