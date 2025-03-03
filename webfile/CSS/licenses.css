@@ -33,7 +33,6 @@ body{
     position: relative;
     overflow-y: scroll;
     text-align: center;
-    display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: center;
