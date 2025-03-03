@@ -121,3 +121,7 @@ body{
     height: 100vh;
 }
 
+footer{
+    position: absolute;
+}
+
