@@ -122,6 +122,6 @@ body{
 }
 
 footer{
-    position: absolute;
+    position: absolute !important;
 }
 
