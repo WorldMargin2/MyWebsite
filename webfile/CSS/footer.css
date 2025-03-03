@@ -1,7 +1,7 @@
 footer{
     display: flex;
     width: 100%;
-    position: absolute;
+    position: relative;
     z-index: 4;
     bottom: 0;
     background-color: rgba(245, 245, 245,0.85);

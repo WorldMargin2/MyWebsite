@@ -30,6 +30,8 @@ class Sever:
         self.handle_event()
         self.getStatic()
         self.main()
+        self.article_url()
+        self.admin_url()
         self.start()
         
     
@@ -76,15 +78,8 @@ class Sever:
         @self.app.route("/LICENSES/<filename>/download")
         def downloadLICENSES(filename):
             # return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r").read()))
-            return(open(f"{LICENSESPATH}{filename}","r").read())
-
-    def main(self):
-
-        @self.app.route("/")
-        def main():
-            return(render_template("index.html"))
+            return(open(f"{LICENSESPATH}{filename}","r").read())        
         
-        #get license
         @self.app.route("/licenses")
         def getLICENSESLIST():
             licenses=[]
@@ -99,25 +94,50 @@ class Sever:
                             ))
                         )
             return(render_template("licenses.html",licenses=licenses))
-        
-        @self.app.route("/article")
-        def getArticlePage():
-            return(render_template("article.html"))
-        
+
+    def main(self):
+
+        @self.app.errorhandler(404)
+        @self.app.route("/404")
+        def notFound():
+            errs=request.args.get("error","")
+            redirect=request.args.get("redirect","/")
+            if(errs==""):
+                errs=["404 Not Found"]
+            else:
+                errs=errs.split("|")
+            return(render_template("404.html", errors=errs, redirect=redirect))
+
+        @self.app.route("/")
+        def main():
+            return(render_template("index.html"))
+
         @self.app.route("/admin")
         @self.checklogin
         def getAdminPage():
-            return(render_template("admin.html"))
-        
-        @self.app.route("/admin/logout")
+            return(
+                render_template(
+                    "admin.html",
+                    admin_name=request.cookies.get("admin_name")
+                )
+            )
+
+    def admin_url(self):    
+        @self.app.route("/admin/logout", methods=["POST","GET"])
         @self.checklogin
         def admin_logout():
-            response = make_response(redirect("/admin/login"))
-            for i in self.userDB.clear_refuse():
-                response.set_cookie(i[0], "", expires=0)
-            response.set_cookie("admin_name", "", expires=0)
-            response.set_cookie(self.userDB.get_config("password_key"), "", expires=0)
-            return response
+            form=AdminLogoutForm()
+            if(request.method=="GET"):
+                return(render_template("admin-logout.html"))
+            if(form.validate_on_submit()):
+                response = make_response(redirect("/admin/login"))
+                for i in self.userDB.clear_refuse():
+                    response.set_cookie(i[0], "", expires=0)
+                response.set_cookie("admin_name", "", expires=0)
+                response.set_cookie(self.userDB.get_config("password_key"), "", expires=0)
+                return response
+            return(redirect("/404",error="表单验证失败"))
+            
         
         @self.app.route("/admin/login",methods=["GET","POST"])
         def admin_login():
@@ -153,6 +173,11 @@ class Sever:
         self.checklogin=checklogin_decorator
 
 
+
+    def article_url(self):
+        @self.app.route("/article")
+        def getArticlePage():
+            return(render_template("article.html"))
 
 
 

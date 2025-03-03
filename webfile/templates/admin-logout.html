@@ -3,15 +3,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="/ICON/WorldMargin.ico" type="image/x-icon">
-    <script src="/JS/jquery.js"></script>
-    <base href="/">
-    <title>管理员{{admin_name}}</title>
+    <title>退出登录</title>
 </head>
 <body>
-    {%include "header.html"%}
-
-
-    {%include "footer.html"%}
-    
+    <form action="/admin/logout">
+        {{ form.csrf_token() }}
+        {{ form.submit }}
+    </form>    
 </body>
 </html>

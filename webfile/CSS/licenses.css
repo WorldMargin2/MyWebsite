@@ -14,7 +14,7 @@ body{
 }
 
 
-.table-container {
+.set-center{
     position: relative;
     margin-top: 10em;
     text-align: center;
@@ -25,9 +25,22 @@ body{
     align-items: center;
 }
 
-table {
+.table-container {
     min-width: 70%;
     max-width: 95%;
+    width: max-content;
+    position: relative;
+    overflow-y: scroll;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+table {
+    width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
 }
@@ -73,4 +86,8 @@ td>a:last-child{
     text-decoration: none;
     font-weight: bold;
     font-size: 1rem;
+}
+
+footer{
+    position: absolute !important;
 }

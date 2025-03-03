@@ -1,0 +1,30 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="/ICON/WorldMargin.ico" type="image/x-icon">
+    <title>404</title>
+    <script>
+        function back() {
+            window.history.back();
+        }
+
+        function redirect() {
+            window.location.href = "{{redirect}}";
+        }
+    </script>
+</head>
+<body>
+    <div class="errors">
+        {%for err in errors%}
+        <p>
+            {{err}}
+        </p>
+        {%endfor%}
+    </div>
+    <div class="next">
+        <button onclick="back()">返回</button>
+        <button onclick="redirect()">重定向</button>
+    </div>
+</body>
+</html>
