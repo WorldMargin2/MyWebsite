@@ -128,7 +128,7 @@ class Sever:
         def admin_logout():
             form=AdminLogoutForm()
             if(request.method=="GET"):
-                return(render_template("admin-logout.html"))
+                return(render_template("admin-logout.html", form=form))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
                 for i in self.userDB.clear_refuse():
