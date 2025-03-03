@@ -44,11 +44,16 @@ $(document).on("scroll", function() {
     changed_font_size = changed_font_size > 30 ? changed_font_size : 30;
     title.css("font-size", changed_font_size+"px");
     title.css("line-height", changed_font_size + "px");
-
     container=$("#container");
     container_h=vh*scale;
     container_h=container_h>35?container_h:35;
     container.css("height",container_h+"px");
+    if(container_h<=37){
+        container.css("background-color","rgb(3,3,3)");
+    }else{
+        container.css("background-color","transparent")
+    }
+
 
     clock_height=tmp_clock_h*scale > 30 ? tmp_clock_h*scale : 30;
     clock=$("#clock");

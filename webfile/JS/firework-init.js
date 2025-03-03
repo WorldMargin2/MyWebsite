@@ -11,33 +11,24 @@ $(document).ready(() => {
 
     let fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 3,
         {
-            frameRate: 60,
-            gravity: 30,
-            speed: 125,
-            life_time: 3,
+            gravity: 50,
+            speed: 150,
+            life_time: 2,
             explode_time: 2,
-            explode_particles: 75,
-            wake_particles: 100,
-            radius: 1.5
+            explode_particles: 125,
+            wake_particles: 60,
+            radius: 2,
+            color_random: false,
         }
     );
     var visiable = true;
-    $(document).on("visibilitychange", function() {
-        if (document.hidden) {
-            fireworks.stop();
-            visiable = false;
-        } else {
-            if (!visiable) {
-                fireworks.start();
-                visiable = true;
-            };
-        };
-    });
+    
+    fireworks.setAutoCloseOrStart();
     fireworks.autoResize(canvas,window);
     fireworks.start();
     setInterval(() => {
         if(visiable){
             fireworks.addRandomFirework();
         }
-    }, Math.random() * 1000 + 1500);
+    }, Math.random() * 1000 + 1000);
 });

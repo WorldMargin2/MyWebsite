@@ -2,7 +2,7 @@ footer{
     display: flex;
     width: 100%;
     position: relative;
-    z-index: 4;
+    z-index: 5;
     bottom: 0;
     background-color: rgba(245, 245, 245,0.85);
     justify-content: center;
@@ -35,3 +35,4 @@ footer img{
     width:1em;
     height:1em;
 }
+

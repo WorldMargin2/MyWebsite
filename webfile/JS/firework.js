@@ -2,7 +2,6 @@ const args_template = {
     ctx: null,                  //canvas上下文(canvas context)
     color: "black",             //粒子颜色(particle color)
     color_random: false,        //是否启用随机颜色(random color)
-    frameRate: 60,              //帧率(frame rate)
 
     life_time: 2 ,              // 发射时长(life time of launch)
     explode_time: 1 ,           // 爆炸(life time of explode) 
@@ -26,10 +25,10 @@ class Particle {
         this.life_time = type=="l"? arg.life_time:arg.explode_time;
         this.type = type;
     };
-    update() {
-        if (this.now_life >= (this.life_time * this.arg.frameRate)) {
+    update(delta) {
+        if (this.now_life >= (this.life_time * 1000)) {
             if(this.type == "e") {
-                this.ease_out();
+                this.ease_out(delta);
             }else if (this.type == "l") {
                 this.arg.life_time_callback?this.arg.life_time_callback(this.arg.x, this.arg.y):0;
             };
@@ -37,14 +36,14 @@ class Particle {
         };
         let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
         let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        vy -= this.arg.gravity/this.arg.frameRate;
+        vy -= this.arg.gravity/(1000/delta);
         this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
         this.arg.speed = Math.sqrt(vx * vx + vy * vy);
-        vx /= this.arg.frameRate;
-        vy /= this.arg.frameRate;
+        vx /= (1000/delta);
+        vy /= (1000/delta);
         this.arg.x += vx;
         this.arg.y += vy;
-        this.now_life++;
+        this.now_life+= delta;
         this.wakes.push([this.arg.x, this.arg.y]);
         if (this.wakes.length > this.arg.wake_particles) {
             this.wakes.shift();
@@ -64,14 +63,14 @@ class Particle {
         ctx.fill();
         ctx.closePath();
     };
-    ease_out() {
+    ease_out(delta) {
         let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
         let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        vy -= this.arg.gravity/this.arg.frameRate;
+        vy -= this.arg.gravity/(1000/delta);
         this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
         this.arg.speed = Math.sqrt(vx * vx + vy * vy);
-        vx /= this.arg.frameRate;
-        vy /= this.arg.frameRate;
+        vx /= (1000/delta);
+        vy /= (1000/delta);
         this.arg.x += vx;
         this.arg.y += vy;
         if(this.wakes.length == 0) {
@@ -96,9 +95,10 @@ class Firework {
         this.arg = arg;
         this.end_callback = end_callback;
     };
-    update() {
+
+    update(delta) {
         if (this.now_life == 0) {
-            this.now_life++;
+            this.now_life+=delta;
             let arg = { ...this.arg };
             arg.life_time_callback = (x,y)=> {
                 this.explode(x,y);
@@ -106,7 +106,7 @@ class Firework {
             this.particles.push(new Particle(arg,"l"));
         };
         for (let i = 0; i < this.particles.length; i++) {
-            this.particles[i].update();
+            this.particles[i].update(delta);
         };
     };
     explode(x,y) {
@@ -138,9 +138,10 @@ class FireworkCanvas {
     #width = 0;
     #height = 0;
     #ctx = null;
-    #interval = null;
     #max_fireworks = 0;
     #args = {};
+    #last_frame_time=0;
+    #requestAnimationFrame = null;
     constructor(ctx, width, height,  max_fireworks = 10,args = {}) {
         this.#ctx = ctx;
         this.#width = width;
@@ -171,34 +172,40 @@ class FireworkCanvas {
         return (this.#started==true);
     };
 
-    #mainLoop() {
+    #mainLoop(frame_start_time) {
+        let delta =this.#last_frame_time!=0? frame_start_time - this.#last_frame_time:16;
         if(!this.#started) {
             return;
         };
         this.#ctx.clearRect(0, 0, this.#width, this.#height);
         for (let i = 0; i < this.#fireworks.length; i++) {
-            this.#fireworks[i].update();
+            this.#fireworks[i].update(delta);
         };
         if (this.#fireworks.length > this.#max_fireworks*2) {
             this.#fireworks = this.#fireworks.slice(0, this.#max_fireworks);
         };
+        this.#requestAnimationFrame=requestAnimationFrame((frame_start_time)=>{this.#mainLoop(frame_start_time);});
     };
 
     start() {
         if (this.#started) {
             return;
         };
+        if(this.#requestAnimationFrame != null) {
+            cancelAnimationFrame(this.#requestAnimationFrame);
+        }
         this.#started = true;
-        this.#interval = setInterval(()=> {
-            this.#mainLoop(this);
-        }, 1000 / this.#args.frameRate);
+        this.#mainLoop();
     };
 
     stop() {
         if (!this.#started) {
             return;
         };
-        clearInterval(this.#interval);
+        if(this.#requestAnimationFrame != null) {
+            cancelAnimationFrame(this.#requestAnimationFrame);
+        }
+        this.#last_frame_time=0;
         this.#started = false;
     };
 
@@ -236,6 +243,27 @@ class FireworkCanvas {
 
     setMaxFireworks(max) {
         this.#max_fireworks = max;
+    }
+
+    setAutoCloseOrStart() {
+        this.removeAutoCloseOrStart();
+        window.addEventListener('visibilitychange',()=> {
+            if(document.hidden) {
+                this.stop();
+            } else {
+                this.start();
+            }
+        });
+    }
+
+    removeAutoCloseOrStart() {
+        window.removeEventListener('visibilitychange',()=> {
+            if(document.hidden) {
+                this.stop();
+            } else {
+                this.start();
+            }
+        });
     }
 };
 
