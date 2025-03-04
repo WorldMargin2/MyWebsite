@@ -21,14 +21,11 @@ $(document).ready(() => {
             color_random: false,
         }
     );
-    let visiable = true;
     
-    fireworks.setAutoCloseOrStart(() =>{visiable = true;},()=>{visiable = false;});
+    fireworks.setAutoCloseOrStart();
     fireworks.autoResize(canvas,window);
     fireworks.start();
     setInterval(() => {
-        if(visiable){
             fireworks.addRandomFirework();
-        }
     }, Math.random() * 1000 + 1000);
 });
