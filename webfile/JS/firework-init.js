@@ -9,13 +9,13 @@ $(document).ready(() => {
 
     fireworks = new FireworkCanvas(ctx, canvas.width, canvas.height, 5,
         {
-            gravity: 50,
-            speed: 150,
+            gravity: 60,
+            speed: 200,
             life_time: 3,
             explode_time: 2,
             explode_particles: 125,
             wake_particles: 60,
-            radius: 2,
+            radius: 1,
             color_random: false
         }
     );
