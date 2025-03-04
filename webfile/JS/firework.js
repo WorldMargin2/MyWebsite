@@ -207,7 +207,7 @@ class FireworkCanvas {
             this.#fireworks[i].update(delta);
         };
         if (this.#fireworks.length > this.#max_fireworks*2) {
-            this.#fireworks = this.#fireworks.slice(0, this.#max_fireworks);
+            this.#fireworks = this.#fireworks.slice(this.#max_fireworks, this.#max_fireworks*2);
         };
         this.#ctx.drawImage(this.#hidden_canvas,0,0);
         this.#requestAnimationFrame=requestAnimationFrame((frame_start_time)=>{this.#mainLoop(frame_start_time);});
