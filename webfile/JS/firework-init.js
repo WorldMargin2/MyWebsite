@@ -27,7 +27,6 @@ $(document).ready(() => {
     fireworks.autoResize(canvas,window);
     fireworks.start();
     setInterval(() => {
-        console.log(visiable);
         if(visiable){
             fireworks.addRandomFirework();
         }
