@@ -27,6 +27,154 @@ class Database:
                 pass
         self.init_db()
 
+class ArticleDB(Database):
+    db=ARTICLEDB
+
+    def __init__(self):
+        super().__init__()
+    
+    def init_db(self):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("DROP TABLE if exists ARTICLE")
+            cs.execute(
+                "CREATE TABLE ARTICLE ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "title TEXT,"
+                    "upload_time TEXT,"
+                    "folder TEXT,"
+                    "visible TEXT,"
+                    "show_weight INT,"
+                    "topest INTEGER"
+                ")"
+            )
+
+            cs.execute("DROP TABLE if exists PREUPLOAD")
+            cs.execute(
+                "CREATE TABLE PREUPLOAD ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                    "title TEXT,"
+                    "upload_time TEXT,"
+                    "folder TEXT,"   #.zip文件
+                    "show_weight INT,"
+                    "topest INTERGER"
+                ")"
+            )
+    
+    def publishArticle(self,article):
+        id:int=0
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select MIN(id+1)"
+                " from ARTICLE AS T1"
+                " where not exists( select * from ARTICLE where id=T1.id+1)"
+            )
+            id=cs.fetchone()[0]
+            cs.execute(
+                "INSERT INTO ARTICLE VALUES (?,?,?,?,?,?,?)",
+                (
+                    id,
+                    article["title"],
+                    article["upload_time"],
+                    article["folder"],
+                    article["visible"],
+                    article["show_weight"],
+                    article["topest"]
+                )
+            )
+            db.commit()
+        return(id)
+
+    def deleteArticle(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "DELETE FROM ARTICLE WHERE id=?",
+                (id,)
+            )
+            db.commit()
+        
+    def delete_preuploadArticle(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "DELETE FROM PREUPLOAD WHERE id=?",
+                (id,)
+            )
+            db.commit()
+
+    def preuploadArticle(self,article):
+        id:int=0
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select MIN(id+1)"
+                " from PREUPLOAD AS T1"
+                " where not exists( select * from PREUPLOAD where id=T1.id+1)"
+            )
+            id=cs.fetchone()[0]
+            cs.execute(
+                "INSERT INTO PREUPLOAD VALUES (?,?,?,?,?,?,?)",
+                (
+                    id,
+                    article["title"],
+                    article["upload_time"],
+                    article["folder"],
+                    article["show_weight"],
+                    article["topest"]
+                )
+            )
+            db.commit()
+        return(id)
+
+    def getArticles(self,index_after_sort:int=0,max=20):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select * from ARTICLE"
+                " order by show_weight desc,topest desc,upload_time desc"
+                " limit ?,?",
+                (index_after_sort,max)
+            )
+            return(cs.fetchall())
+
+    def getArticleFolderFromId(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select folder from ARTICLE where id=?",
+                (id,)
+            )
+            return(cs.fetchone()[0])
+
+    def getArticleFromId(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select * from ARTICLE where id=?",
+                (id,)
+            )
+            return(cs.fetchone())
+    
+    def getPreuploadFolderFromId(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select folder from PREUPLOAD where id=?",
+                (id,)
+            )
+            return(cs.fetchone()[0])
+
+    def getPreuploadArticleFromId(self,id):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select * from PREUPLOAD where id=?",
+                (id,)
+            )
+            return(cs.fetchone())
+
 class UserDB(Database):
     db=USERDB
     max_salt_count=10

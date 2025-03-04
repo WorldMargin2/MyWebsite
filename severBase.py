@@ -1,9 +1,11 @@
 from functools import wraps
-from flask import Flask,jsonify,render_template,redirect,make_response
+from flask import Flask,jsonify,render_template,redirect,make_response, send_from_directory
 from flask import request, session,url_for,abort,send_file,flash,get_flashed_messages
 from flask_wtf.csrf import CSRFProtect
+from werkzeug.utils import secure_filename
 from importLib.manageDatabase import *
 from importLib.forms import *
+import zipfile
 
 WEBFILEPATH="./webfile/"
 JSPATH=f"{WEBFILEPATH}JS/"
@@ -14,6 +16,8 @@ DATABASEPATH="./database/"
 HTMLPATH=f"{WEBFILEPATH}HTML/"
 LICENSESPATH=f"{WEBFILEPATH}LICENSES/"
 ARTICLEPATH=f"{WEBFILEPATH}ARTICLES/"
+UPLOADEDARTICLEPATH=f"{ARTICLEPATH}UPLOADED/"
+PREUPLOADPATH=f"{ARTICLEPATH}PREUPLOAD/"
 
 
         
@@ -27,6 +31,7 @@ class Sever:
         self.app.config["SECRET_KEY"]="SOCITY"
         self.csrf=CSRFProtect(self.app)
         self.userDB=UserDB()
+        self.articleDB=ArticleDB()
         self.handle_event()
         self.getStatic()
         self.main()
@@ -99,7 +104,7 @@ class Sever:
 
         @self.app.errorhandler(404)
         @self.app.route("/404")
-        def notFound():
+        def notFound(error=None):
             errs=request.args.get("error","")
             redirect=request.args.get("redirect","/")
             if(errs==""):
@@ -175,9 +180,64 @@ class Sever:
 
 
     def article_url(self):
+        @self.app.route("/admin/push_article")
+        @self.checklogin
+        def push_article():
+            article_id:int=0
+            form = PushArticleForm()
+            if(request.method=="GET"):
+                pass
+            else:
+                if (form.validate_on_submit()):
+                    article=dict()
+                    article["title"]=form.title.data
+                    article["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    article["topest"]=form.topest.data
+                    article["publish_now"]=form.publish_now.data
+                    zip_file=form.zipfile.data
+                    file_name=secure_filename(zip_file.filename)
+                    article["folder"]=file_name
+                    file_path=os.path.join(PREUPLOADPATH+file_name)
+                    zip_file.save(file_path)
+                    if(form.publish_now.data):
+                        article_id=self.articleDB.publishArticle(article)
+                        if(zipfile.is_zipfile(file_path)):
+                            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                                zip_ref.extractall(os.path.abspath(file_path))
+                        return(redirect(f"/article/{article_id}"))
+                    else:
+                        article_id=self.articleDB.preuploadArticle(article)
+            return(render_template("push_article.html"))
+
+
+        @self.app.route("/admin/delete_preupload_article/<id>")
+        @self.checklogin
+        def delete_preupload_article(id:int):
+            self.articleDB.delete_preuploadArticle(id)
+            return(redirect("/admin/article"))
+
+        @self.app.route("/admin/delete_article/<id>")
+        @self.checklogin
+        def delete_article(id:int):
+            folder=self.articleDB.getArticleFolderFromId(id)
+            self.articleDB.deleteArticle(id)
+            os.remove(PREUPLOADPATH+folder)
+            return(redirect("/admin/article"))
+
+
         @self.app.route("/article")
-        def getArticlePage():
+        def getArticlesPage():
             return(render_template("article.html"))
+        
+        @self.app.route("/article/<id>/<file_name>")
+        def getArticle(id:int,file_name:str):
+            return(send_from_directory(f"{ARTICLEPATH}{self.articleDB.getArticleFolderFromId(id)}",file_name))
+
+        @self.app.route("/article/<id>")
+        @self.checklogin
+        def getArticlePage(id:int):
+            return(render_template("article.html",id=id))
+
 
 
 

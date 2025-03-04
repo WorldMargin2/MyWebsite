@@ -17,18 +17,37 @@ here are some exciting features of this project:
 
 ```
 MYWEBSITE
+D:\DESKTOP\PYTHON PROJECT\MYWEBSITE
 │  LICENSE
 │  main.py
 │  README.md
 │  severBase.py
 │
+├─database
+│      article.db
+│      user.db
+│
+├─importLib
+│     forms.py
+│     manageDatabase.py
+│  
+│  
+│  
+│  
+│
 └─webfile
+   ├─ARTICLES
+   │  ├─PREUPLOAD
+   │  └─UPLOADED
    ├─CSS
+   │      --scroll-bar.css
    │      clock.css
    │      footer.css
    │      header.css
+   │      index-maincontent.css
    │      index.css
    │      licenses.css
+   │      login.css
    │
    ├─HTML
    ├─ICON
@@ -40,28 +59,83 @@ MYWEBSITE
    ├─JS
    │      clipboard.js
    │      clock.js
-   │      firework.js
    │      firework-init.js
+   │      firework.js
    │      index.js
    │      jquery-ui.js
    │      jquery.js
+   │      marked.min.js
    │
    ├─LICENSES
    │      clipboard.license
+   │      clock-js.license
+   │      firework.license
+   │      flaskseverbase.license
    │      jquery-ui.license
    │      jquery.license
-   │      firework.license
-   │      mywebsite.license
    │      licenses.list
+   │      markedjs.license
    │
    └─templates
+           404.html
+           admin-account-manage.html
+           admin-logout.html
+           admin.html
+           article.html
            clock.html
            footer.html
            header.html
            index-main-content.html
            index.html
            licenses.html
+           login.html
+           push_article.html
            readLicense.html
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```
 
