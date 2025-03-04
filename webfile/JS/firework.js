@@ -25,6 +25,17 @@ class Particle {
         this.life_time = type=="l"? arg.life_time:arg.explode_time;
         this.type = type;
     };
+
+    calculatePosition(delta) {
+        let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
+        let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
+        vy -= (this.arg.gravity*delta)/1000;
+        this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
+        this.arg.speed = Math.sqrt(vx * vx + vy * vy);
+        this.arg.x += (vx*delta)/1000;
+        this.arg.y += (vy*delta)/1000;
+    }
+
     update(delta) {
         if (this.now_life >= (this.life_time * 1000)) {
             if(this.type == "e") {
@@ -34,15 +45,7 @@ class Particle {
             };
             return;
         };
-        let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        vy -= this.arg.gravity/(1000/delta);
-        this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
-        this.arg.speed = Math.sqrt(vx * vx + vy * vy);
-        vx /= (1000/delta);
-        vy /= (1000/delta);
-        this.arg.x += vx;
-        this.arg.y += vy;
+        this.calculatePosition(delta);
         this.now_life+= delta;
         this.wakes.push([this.arg.x, this.arg.y]);
         if (this.wakes.length > this.arg.wake_particles) {
@@ -50,6 +53,21 @@ class Particle {
         };
         this.draw();
     };
+
+    ease_out(delta) {
+        this.calculatePosition(delta);
+        if(this.wakes.length == 0) {
+            if (this.arg.life_time_callback) {
+                this.arg.life_time_callback();
+            };
+            return;
+        };
+        this.wakes.push([this.arg.x, this.arg.y]);
+        this.wakes.shift();
+        this.wakes.shift();
+        this.draw();
+    };
+
     draw() {
         let ctx = this.arg.ctx;
         ctx.beginPath();
@@ -63,27 +81,7 @@ class Particle {
         ctx.fill();
         ctx.closePath();
     };
-    ease_out(delta) {
-        let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        vy -= this.arg.gravity/(1000/delta);
-        this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
-        this.arg.speed = Math.sqrt(vx * vx + vy * vy);
-        vx /= (1000/delta);
-        vy /= (1000/delta);
-        this.arg.x += vx;
-        this.arg.y += vy;
-        if(this.wakes.length == 0) {
-            if (this.arg.life_time_callback) {
-                this.arg.life_time_callback(this.arg.x, this.arg.y);
-            };
-            return;
-        };
-        this.wakes.push([this.arg.x, this.arg.y]);
-        this.wakes.shift();
-        this.wakes.shift();
-        this.draw();
-    };
+    
 };
 
 class Firework {
@@ -91,30 +89,44 @@ class Firework {
     ease_out_ = [];
     now_life = 0;
     wakes = [];
+    explode_position = null;
+    animate_end=false;
+    launch_end=false;
     constructor(arg,end_callback) {
         this.arg = arg;
         this.end_callback = end_callback;
     };
 
     update(delta) {
-        if (this.now_life == 0) {
-            this.now_life+=delta;
-            let arg = { ...this.arg };
-            arg.life_time_callback = (x,y)=> {
-                this.explode(x,y);
-            };
-            this.particles.push(new Particle(arg,"l"));
-        };
+        if(this.animate_end) {
+            this.end_callback(this);
+            return;
+        }
+        if(this.launch_end) {
+            if(this.explode_position!=null){
+                this.particles=[];
+                this.explode(this.explode_position[0],this.explode_position[1]);
+                this.explode_position = null;
+            }
+        }
         for (let i = 0; i < this.particles.length; i++) {
             this.particles[i].update(delta);
         };
+        if (this.now_life == 0) {
+            this.now_life+=delta;
+            let arg = { ...this.arg };
+            arg.life_time_callback = ((x,y)=> {
+                this.explode_position = [x,y];
+                this.launch_end = true;
+            }).bind(this);
+            this.particles.push(new Particle(arg,"l"));
+        };
     };
     explode(x,y) {
-        this.particles = [];
         for (let i = 0; i < this.arg.explode_particles; i++) {
             let arg = { ...this.arg };
             if (i == 0) {
-                arg.life_time_callback = ()=>{ this.particles = []; this.end_callback(this); };
+                arg.life_time_callback = ()=>{ this.animate_end = true; };
             };
             let angle = (360 / this.arg.explode_particles)*i + Math.random() * 2;
             arg.angle = angle;
@@ -142,13 +154,23 @@ class FireworkCanvas {
     #args = {};
     #last_frame_time=0;
     #requestAnimationFrame = null;
+    #hidden_canvas = null;
+    #hidden_ctx= null;
     constructor(ctx, width, height,  max_fireworks = 10,args = {}) {
         this.#ctx = ctx;
+        this.init_hidden_canvas(width,height);
         this.#width = width;
         this.#height = height;
         this.#max_fireworks = max_fireworks; // 最大并行更新烟花数量
         this.#args = {...args_template,...args};
     };
+
+    init_hidden_canvas(width ,height){
+        this.#hidden_canvas = document.createElement('canvas');
+        this.#hidden_canvas.width = width;
+        this.#hidden_canvas.height = height;
+        this.#hidden_ctx = this.#hidden_canvas.getContext('2d');
+    }
 
     addFirework(arg) {
         if(!this.#started) {
@@ -162,7 +184,7 @@ class FireworkCanvas {
 
     addRandomFirework() {
         let arg = {};
-        arg.ctx = this.#ctx;
+        arg.ctx = this.#hidden_ctx;
         arg.x = Math.random() * this.#width;
         arg.color = `rgb(${Math.random() * 255},${Math.random() * 255},${Math.random() * 255})`;
         this.addFirework(arg);
@@ -173,17 +195,21 @@ class FireworkCanvas {
     };
 
     #mainLoop(frame_start_time) {
-        let delta =this.#last_frame_time!=0? frame_start_time - this.#last_frame_time:16;
+        let delta =this.#last_frame_time !=0? frame_start_time - this.#last_frame_time:16;
+        this.#last_frame_time = frame_start_time;
         if(!this.#started) {
             return;
         };
         this.#ctx.clearRect(0, 0, this.#width, this.#height);
+        this.#ctx.drawImage(this.#hidden_canvas,0,0);
+        this.#hidden_ctx.clearRect(0, 0, this.#width, this.#height);
         for (let i = 0; i < this.#fireworks.length; i++) {
             this.#fireworks[i].update(delta);
         };
         if (this.#fireworks.length > this.#max_fireworks*2) {
             this.#fireworks = this.#fireworks.slice(0, this.#max_fireworks);
         };
+        this.#ctx.drawImage(this.#hidden_canvas,0,0);
         this.#requestAnimationFrame=requestAnimationFrame((frame_start_time)=>{this.#mainLoop(frame_start_time);});
     };
 
@@ -212,9 +238,13 @@ class FireworkCanvas {
     updateSize(canvas,element) {
         this.#width = element.innerWidth;
         this.#height = element.innerHeight;
+
         canvas.width = element.innerWidth;
         canvas.height = element.innerHeight;
         this.#ctx.setTransform(1,0,0,-1,0,canvas.height);
+        //更新
+        this.#hidden_canvas.width = element.innerWidth;
+        this.#hidden_canvas.height = element.innerHeight;
     };
 
     autoResize(canvas,element=window) {
@@ -245,22 +275,26 @@ class FireworkCanvas {
         this.#max_fireworks = max;
     }
 
-    setAutoCloseOrStart() {
+    setAutoCloseOrStart(start_func=null,stop_func=null) {
         this.removeAutoCloseOrStart();
         window.addEventListener('visibilitychange',()=> {
             if(document.hidden) {
+                if(stop_func != null) stop_func();
                 this.stop();
             } else {
+                if(start_func != null) start_func();
                 this.start();
             }
         });
     }
 
-    removeAutoCloseOrStart() {
+    removeAutoCloseOrStart(start_func=null,stop_func=null) {
         window.removeEventListener('visibilitychange',()=> {
             if(document.hidden) {
+                if(stop_func != null) stop_func();
                 this.stop();
             } else {
+                if(start_func != null) start_func();
                 this.start();
             }
         });

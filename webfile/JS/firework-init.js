@@ -21,12 +21,13 @@ $(document).ready(() => {
             color_random: false,
         }
     );
-    var visiable = true;
+    let visiable = true;
     
-    fireworks.setAutoCloseOrStart();
+    fireworks.setAutoCloseOrStart(() =>{visiable = true;},()=>{visiable = false;});
     fireworks.autoResize(canvas,window);
     fireworks.start();
     setInterval(() => {
+        console.log(visiable);
         if(visiable){
             fireworks.addRandomFirework();
         }
