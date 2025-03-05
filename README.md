@@ -1,5 +1,5 @@
 # MyWebsite
- 
+
  this is a personal website setup by flask.
  the "index.html" in root is only redirect to "index.html" in "templates" folder.
  the project is based on "https://github.com/WorldMargin2/flaskSeverBase"
@@ -17,7 +17,6 @@ here are some exciting features of this project:
 
 ```
 MYWEBSITE
-D:\DESKTOP\PYTHON PROJECT\MYWEBSITE
 │  LICENSE
 │  main.py
 │  README.md
@@ -91,9 +90,7 @@ D:\DESKTOP\PYTHON PROJECT\MYWEBSITE
            login.html
            push_article.html
            readLicense.html
- 
 ```
-
 
 ## Usage
 
@@ -101,6 +98,6 @@ D:\DESKTOP\PYTHON PROJECT\MYWEBSITE
 2. install flask-wtf
 
 # demo video
+
 ![Sample Video](https://github.com/user-attachments/assets/5705207f-ac28-4c93-8797-849c37b00f25)
 <video><resource src="https://github.com/user-attachments/assets/5705207f-ac28-4c93-8797-849c37b00f25"></resource></video>
-
