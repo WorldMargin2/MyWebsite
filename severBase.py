@@ -305,7 +305,7 @@ class Sever:
             id=int(id)
             article_path=self.articleDB.getArticleFolderFromId(id)
             article_info=self.articleDB.getArticleFromId(id)
-            with open(os.path.join(UPLOADEDARTICLEPATH,article_path,"main.html"),"r") as file:
+            with open(os.path.join(UPLOADEDARTICLEPATH,article_path,"main.html"),"r",encoding="GBK") as file:
                 main_content=file.read()
             if(not (article_path and self.articleDB.is_article_visible(id))):
                 return(self.redirect_404(error="未找到该文章"))
