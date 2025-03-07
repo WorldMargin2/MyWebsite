@@ -240,8 +240,6 @@ class Sever:
                     article["show_weight"]=form.show_weight.data
                     article["publish_now"]=form.publish_now.data
                     article["visible"]=form.visible.data
-                    
-
                     zip_file=request.files["zipfile"]
                     article_id="%05d"%(self.articleDB.fetch_free_ID() or 1 ,)
                     article["id"]=article_id
@@ -266,7 +264,7 @@ class Sever:
                 return(self.redirect_404(error="表单验证失败"))
             
         
-
+        
 
         @self.app.route("/admin/edit_preupload_article")
         @self.checklogin
@@ -276,7 +274,9 @@ class Sever:
         @self.app.route("/admin/delete_preupload_article/<id>")
         @self.checklogin
         def delete_preupload_article(id:int):
+            folder=self.articleDB.getPreuploadFolderFromId(id)
             self.articleDB.delete_preuploadArticle(id)
+            os.remove(PREUPLOADPATH+folder)
             return(redirect("/admin/article"))
 
         @self.app.route("/admin/delete_article/<id>")
@@ -284,7 +284,7 @@ class Sever:
         def delete_article(id:int):
             folder=self.articleDB.getArticleFolderFromId(id)
             self.articleDB.deleteArticle(id)
-            os.remove(PREUPLOADPATH+folder)
+            os.remove(UPLOADEDARTICLEPATH+folder)
             return(redirect("/admin/article"))
 
         # normal
