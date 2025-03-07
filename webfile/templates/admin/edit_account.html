@@ -1,0 +1,23 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修改账号</title>
+</head>
+<body>
+    <form action="" method="POST">
+        <h1>修改名称</h1>
+        {{name_form.csrf_token()}}
+        {{name_form.admin_name}}
+        {{name_form.submit}}
+    </form>
+    <form action="" method="POST">
+        <h1>修改密码</h1>
+        {{pwd_form.csrf_token()}}
+        {{pwd_form.origin_password}}
+        {{pwd_form.password}}
+        {{pwd_form.password_confirm}}
+        {{pwd_form.submit}}
+    </form>
+</body>
+</html>

@@ -17,36 +17,41 @@ here are some exciting features of this project:
 
 ```
 MYWEBSITE
+│  index.html
 │  LICENSE
 │  main.py
 │  README.md
 │  severBase.py
 │
 ├─database
-│      article.db
-│      user.db
+│      
+│      
 │
 ├─importLib
 │     forms.py
 │     manageDatabase.py
 │  
-│  
-│  
-│  
 │
 └─webfile
    ├─ARTICLES
    │  ├─PREUPLOAD
+   │  │      
+   │  │
    │  └─UPLOADED
+   │
    ├─CSS
    │      --scroll-bar.css
    │      clock.css
    │      footer.css
+   │      github-markdown.css
    │      header.css
    │      index-maincontent.css
    │      index.css
    │      licenses.css
    │      login.css
+   │      markdown.css
+   │      mdmdt.css
+   │      render_article.css
    │
    ├─HTML
    ├─ICON
@@ -58,6 +63,7 @@ MYWEBSITE
    ├─JS
    │      clipboard.js
    │      clock.js
+   │      extend-marked.js
    │      firework-init.js
    │      firework.js
    │      index.js
@@ -73,23 +79,36 @@ MYWEBSITE
    │      jquery-ui.license
    │      jquery.license
    │      licenses.list
+   │      markdown-css.license
    │      markedjs.license
+   │      mdmdt.license
    │
    └─templates
-           404.html
-           admin-account-manage.html
-           admin-logout.html
-           admin.html
-           article.html
-           clock.html
-           footer.html
-           header.html
-           index-main-content.html
-           index.html
-           licenses.html
-           login.html
-           push_article.html
-           readLicense.html
+       │  404.html
+       │  clock.html
+       │  footer.html
+       │  header.html
+       │  licenses.html
+       │  readLicense.html
+       │
+       ├─admin
+       │      admin-account-manage.html
+       │      admin-logout.html
+       │      admin.html
+       │      edit_account.html
+       │      login.html
+       │
+       ├─article
+       │      article.html
+       │      edit_preupload_article.html
+       │      push_article.html
+       │      render_article.html
+       │
+       └─index
+               index-main-content.html
+               index.html
+ 
+
 ```
 
 ## Usage

@@ -6,7 +6,7 @@
     <title>退出登录</title>
 </head>
 <body>
-    <form action="/admin/logout">
+    <form action="/admin/logout" method="post">
         {{ form.csrf_token() }}
         {{ form.submit }}
     </form>    

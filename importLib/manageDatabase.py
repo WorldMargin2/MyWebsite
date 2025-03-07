@@ -294,7 +294,49 @@ class UserDB(Database):
         with dbconnect(self.db) as db:
             cs=db.cursor()
             return self.__set_config(config_name,config_value,cs)
+        
+    def change_name(self,origin_name,name):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("update admin set admin_name=? where admin_name=?",(name,origin_name))
+            db.commit()
+            return True
 
+    def change_password(self,admin_name,pwd):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            new_salt=os.urandom(6).hex()
+            new_hashed_pwd=generate_password_hash(pwd+new_salt)
+            password_key=os.urandom(6).hex()
+            cs.execute("UPDATE Admin SET password=? WHERE admin_name=?",(new_hashed_pwd,admin_name))
+            self.__set_config("password_key",password_key,cs)
+            self.__set_config("salt",new_salt,cs)
+            confuse_strs=self.__summon_confuse(cs)
+            res={
+                    i:generate_password_hash(os.urandom(6).hex()) for i in confuse_strs
+                }
+            res.update({
+                "admin_name":admin_name,
+                password_key:new_hashed_pwd,
+            })
+            return (
+                res
+            )
+
+
+    def check_pwd(self,name,pwd:str):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            salt=self.__get_config("salt",cs)
+            cs.execute("SELECT * FROM Admin WHERE admin_name=?",(name,))
+            data=cs.fetchone()
+            if(data==None):
+                return (None)
+            (_,_password)=data
+            if(check_password_hash(_password,pwd+salt)):
+                return True
+            else:
+                return False
 
     def login(self,name:str,password:str,ip:str)->dict:
         with dbconnect(self.db) as db:

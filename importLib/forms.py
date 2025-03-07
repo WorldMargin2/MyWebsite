@@ -33,6 +33,11 @@ class AdminNameEditForm(FlaskForm):
     submit = SubmitField("提交")
 
 class AdminPasswordEditForm(FlaskForm):
+    origin_password=PasswordField(
+        "原密码",
+        render_kw={"placeholder": "原密码"},
+        validators=[InputRequired()]
+    )
     password = PasswordField(
         "管理员密码",
         render_kw={"placeholder": "修改密码"},

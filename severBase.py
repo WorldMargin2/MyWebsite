@@ -170,12 +170,41 @@ class Sever:
                 if login_result:
                     response = make_response(redirect("/admin"))
                     for key, value in login_result.items():
-                        print(key, value)
                         response.set_cookie(key, value, max_age=60 * 60 * 24 * 7)
                     return response
                 else:
                     errors.append("用户名或密码错误")
             return render_template("admin/login.html", form=form, errors=errors)
+
+        @self.app.route("/admin/edit_account",methods=["GET","POST"])
+        @self.checklogin
+        def edit_account():
+            name_form=AdminNameEditForm()
+            pwd_form=AdminPasswordEditForm()
+            name_errs=[]
+            pwd_errs=[]
+            if(request.method=="GET"):
+                return(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form))
+            else:
+                origin_name=request.cookies.get("admin_name")
+                if(name_form.validate_on_submit()):
+                    self.userDB.change_name(origin_name,name_form.data)
+                    response=make_response(redirect("/admin"))
+                    response.set_cookie("admin_name",name_form.data,max_age=60 * 60 * 24 * 7)
+                    return(response)
+                elif(pwd_form.validate_on_submit()):
+                    if(self.userDB.check_pwd(origin_name,pwd_form.origin_password.data)):
+                        response=make_response(redirect("/admin"))
+                        for i in self.userDB.clear_refuse():
+                            response.set_cookie(i[0], "", expires=0)
+                        res=self.userDB.change_password(origin_name,pwd_form.password.data)
+                        for i in res.items():
+                            response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
+                        return(response)
+                return(render_template("admin/edit_name_pwd.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
+
+
+
 
     def redirect_404(self,error=None):
         return(redirect(url_for("notFound",error=error)))
