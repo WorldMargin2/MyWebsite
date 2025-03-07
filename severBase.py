@@ -20,6 +20,16 @@ UPLOADEDARTICLEPATH=f"{ARTICLEPATH}UPLOADED/"
 PREUPLOADPATH=f"{ARTICLEPATH}PREUPLOAD/"
 
 
+
+def init_folder():
+    if not os.path.exists(DATABASEPATH):
+        os.mkdir(DATABASEPATH)
+    if not os.path.exists(ARTICLEPATH):
+        os.mkdir(ARTICLEPATH)
+    if not os.path.exists(UPLOADEDARTICLEPATH):
+        os.mkdir(UPLOADEDARTICLEPATH)
+    if not os.path.exists(PREUPLOADPATH):
+        os.mkdir(PREUPLOADPATH)
         
 def readFile(file_path):
     with open(file_path,"rb") as file:
@@ -30,6 +40,7 @@ class Sever:
         self.app=Flask(__name__,template_folder=f"{WEBFILEPATH}templates")
         self.app.config["SECRET_KEY"]="SOCITY"
         self.csrf=CSRFProtect(self.app)
+        init_folder()
         self.userDB=UserDB()
         self.articleDB=ArticleDB()
         self.handle_event()
