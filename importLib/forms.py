@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, RadioField, StringField, PasswordField, SubmitField,FileField,IntegerField
+from wtforms import HiddenField, RadioField, StringField
+from wtforms import SelectField, PasswordField, SubmitField,FileField,IntegerField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, InputRequired
 
 
@@ -47,27 +48,34 @@ class AdminPasswordEditForm(FlaskForm):
 
 class PushArticleForm(FlaskForm):
     title = StringField(
-        "标题",
+        label="标题",
         render_kw={"placeholder": "请输入标题"},
         validators=[InputRequired()]
     )
     show_weight=IntegerField(
-        "权重",
+        label="权重",
         render_kw={"placeholder": "请输入权重"},
-        validators=[InputRequired()]
-    )
-    topest=RadioField(
-        "是否置顶",
-        choices=[(0, '否'), (1, '是')],
-        default=1,
-        validators=[InputRequired()]
+        validators=[InputRequired()],
+        default=0
     )
     zipfile = FileField(
         "上传文件",
         validators=[InputRequired()]
     )
-    publish_now=RadioField(
-        "是否立即发布",
+    publish_now=SelectField(
+        label="是否立即发布",
+        choices=[(0, '否'), (1, '是')],
+        default=1,
+        validators=[InputRequired()]
+    )
+    topest=SelectField(
+        label="是否置顶",
+        choices=[(0, '否'), (1, '是')],
+        default=1,
+        validators=[InputRequired()]
+    )
+    visible=SelectField(
+        label="是否可见",
         choices=[(0, '否'), (1, '是')],
         default=1,
         validators=[InputRequired()]

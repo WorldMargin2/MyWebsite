@@ -1,0 +1,24 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUSH ARTICLE</title>
+    <script src="/JS/jquery.js"></script>
+</head>
+<body>
+    {%include 'header.html'%}
+    <div style="max-height: 100vh;min-height: 95vh;">
+        <form action="" method="post" enctype="multipart/form-data">
+            {{form.csrf_token()}}
+            <div>{{form.title.label}}       {{form.title}}      </div>
+            <div>{{form.show_weight.label}} {{form.show_weight}}</div>
+            <div>{{form.topest.label}}      {{form.topest}}     </div>
+            <div>{{form.publish_now.label}} {{form.publish_now}}</div>
+            <div>{{form.visible.label}}    {{form.visible}}   </div>
+            <div>{{form.zipfile}}</div>
+            <div>{{form.submit}}</div>
+        </form>
+    </div>
+    {%include 'footer.html'%}   
+</body>
+</html>

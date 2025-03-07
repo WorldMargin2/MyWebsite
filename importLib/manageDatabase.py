@@ -25,7 +25,7 @@ class Database:
         if(not os.path.exists(self.db)):
             with dbconnect(self.db,timeout=10) as db:
                 pass
-        self.init_db()
+            self.init_db()
 
 class ArticleDB(Database):
     db=ARTICLEDB
@@ -42,7 +42,6 @@ class ArticleDB(Database):
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "title TEXT,"
                     "upload_time TEXT,"
-                    "folder TEXT,"
                     "visible TEXT,"
                     "show_weight INT,"
                     "topest INTEGER"
@@ -55,36 +54,39 @@ class ArticleDB(Database):
                     "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
                     "title TEXT,"
                     "upload_time TEXT,"
-                    "folder TEXT,"   #.zip文件
                     "show_weight INT,"
                     "topest INTERGER"
                 ")"
             )
+
+    def _fetch_freeID(self,cs:Cursor):
+        cs.execute(
+            "select MIN(id+1)"
+            " from ARTICLE AS T1"
+            " where not exists( select * from ARTICLE where id=T1.id+1)"
+        )
+        return(cs.fetchone()[0])
+    
+    def fetch_free_ID(self):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            return(self._fetch_freeID(cs))
     
     def publishArticle(self,article):
-        id:int=0
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select MIN(id+1)"
-                " from ARTICLE AS T1"
-                " where not exists( select * from ARTICLE where id=T1.id+1)"
-            )
-            id=cs.fetchone()[0]
-            cs.execute(
-                "INSERT INTO ARTICLE VALUES (?,?,?,?,?,?,?)",
+                "INSERT INTO ARTICLE VALUES (?,?,?,?,?,?)",
                 (
-                    id,
+                    int(article["id"]),
                     article["title"],
                     article["upload_time"],
-                    article["folder"],
                     article["visible"],
                     article["show_weight"],
                     article["topest"]
                 )
             )
             db.commit()
-        return(id)
 
     def deleteArticle(self,id):
         with dbconnect(self.db) as db:
@@ -95,7 +97,7 @@ class ArticleDB(Database):
             )
             db.commit()
         
-    def delete_preuploadArticle(self,id):
+    def delete_preuploadArticle(self,id:int):
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
@@ -105,75 +107,104 @@ class ArticleDB(Database):
             db.commit()
 
     def preuploadArticle(self,article):
-        id:int=0
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select MIN(id+1)"
-                " from PREUPLOAD AS T1"
-                " where not exists( select * from PREUPLOAD where id=T1.id+1)"
-            )
-            id=cs.fetchone()[0]
-            cs.execute(
-                "INSERT INTO PREUPLOAD VALUES (?,?,?,?,?,?,?)",
+                "INSERT INTO PREUPLOAD VALUES (?,?,?,?,?)",
                 (
-                    id,
+                    int(article["id"]),
                     article["title"],
                     article["upload_time"],
-                    article["folder"],
                     article["show_weight"],
                     article["topest"]
                 )
             )
             db.commit()
-        return(id)
-
-    def getArticles(self,index_after_sort:int=0,max=20):
+        
+    def is_article_visible(self,id:int):
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select * from ARTICLE"
+                "select visible from ARTICLE where id=?",
+                (id,)
+            )
+            res=cs.fetchone()
+            if(res):
+                return(res[0])
+            return(None)
+
+    def getArticles(self,index_after_sort:int=0,max=20)->list[int]:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select id from ARTICLE"
                 " order by show_weight desc,topest desc,upload_time desc"
-                " limit ?,?",
+                " limit ?,? where visible=1",
                 (index_after_sort,max)
             )
             return(cs.fetchall())
 
-    def getArticleFolderFromId(self,id):
+    def getArticleFolderFromId(self,id:int)->str:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select folder from ARTICLE where id=?",
+                "select id from ARTICLE where id=?",
                 (id,)
             )
-            return(cs.fetchone()[0])
+            res=cs.fetchone()
+            if(res):
+                return("%05d"%(res[0],))
+            return(None)
 
-    def getArticleFromId(self,id):
+    def getArticleFromId(self,id:int)->dict:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select * from ARTICLE where id=?",
+                "select title,upload_time,topest from ARTICLE where id=?",
                 (id,)
             )
-            return(cs.fetchone())
+            res=cs.fetchone()
+            if(res):
+                return(
+                    dict(
+                        zip(
+                            ("title","upload_time","topest"),
+                            res
+                        )
+                    )
+                )
+            return(None)
     
-    def getPreuploadFolderFromId(self,id):
+    def getPreuploadFolderFromId(self,id:int)->str:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select folder from PREUPLOAD where id=?",
+                "select id from PREUPLOAD where id=?",
                 (id,)
             )
-            return(cs.fetchone()[0])
+            res=cs.fetchone()
+            if(res):
+                return("%05d"%(res[0],))
+            return(None)
 
-    def getPreuploadArticleFromId(self,id):
+    def getPreuploadArticleFromId(self,id:int)->dict:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select * from PREUPLOAD where id=?",
+                "select title,upload_time,topest from PREUPLOAD where id=?",
                 (id,)
             )
-            return(cs.fetchone())
+            res=cs.fetchone()
+            if(res):
+                return(
+                    dict(
+                        zip(
+                            ("title","upload_time","topest"),
+                            res
+                        )
+                    )
+                )
+            return(None)
 
 class UserDB(Database):
     db=USERDB

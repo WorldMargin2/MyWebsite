@@ -82,7 +82,6 @@ class Sever:
         @self.app.route("/WebFile/LICENSES/<filename>/download")
         @self.app.route("/LICENSES/<filename>/download")
         def downloadLICENSES(filename):
-            # return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r").read()))
             return(open(f"{LICENSESPATH}{filename}","r").read())        
         
         @self.app.route("/licenses")
@@ -111,18 +110,20 @@ class Sever:
                 errs=["404 Not Found"]
             else:
                 errs=errs.split("|")
+            if(error):
+                errs.append(error)
             return(render_template("404.html", errors=errs, redirect=redirect))
 
         @self.app.route("/")
         def main():
-            return(render_template("index.html"))
+            return(render_template("index/index.html"))
 
         @self.app.route("/admin")
         @self.checklogin
         def getAdminPage():
             return(
                 render_template(
-                    "admin.html",
+                    "admin/admin.html",
                     admin_name=request.cookies.get("admin_name")
                 )
             )
@@ -133,7 +134,7 @@ class Sever:
         def admin_logout():
             form=AdminLogoutForm()
             if(request.method=="GET"):
-                return(render_template("admin-logout.html", form=form))
+                return(render_template("admin/admin-logout.html", form=form))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
                 for i in self.userDB.clear_refuse():
@@ -163,8 +164,10 @@ class Sever:
                     return response
                 else:
                     errors.append("用户名或密码错误")
-            return render_template("login.html", form=form, errors=errors)
+            return render_template("admin/login.html", form=form, errors=errors)
 
+    def redirect_404(self,error=None):
+        return(redirect(url_for("notFound",error=error)))
 
     def handle_event(self):
         def checklogin_decorator(f):
@@ -180,35 +183,55 @@ class Sever:
 
 
     def article_url(self):
-        @self.app.route("/admin/push_article")
+        # admin required
+        @self.app.route("/admin/push_article",methods=["GET","POST"])
         @self.checklogin
         def push_article():
             article_id:int=0
             form = PushArticleForm()
             if(request.method=="GET"):
-                pass
+                return(render_template("article/push_article.html",form=form))
             else:
                 if (form.validate_on_submit()):
                     article=dict()
                     article["title"]=form.title.data
                     article["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                     article["topest"]=form.topest.data
+                    article["show_weight"]=form.show_weight.data
                     article["publish_now"]=form.publish_now.data
-                    zip_file=form.zipfile.data
-                    file_name=secure_filename(zip_file.filename)
-                    article["folder"]=file_name
-                    file_path=os.path.join(PREUPLOADPATH+file_name)
+                    article["visible"]=form.visible.data
+                    
+
+                    zip_file=request.files["zipfile"]
+                    article_id="%05d"%(self.articleDB.fetch_free_ID() or 1 ,)
+                    article["id"]=article_id
+                    file_path=os.path.join(PREUPLOADPATH,article_id)
                     zip_file.save(file_path)
                     if(form.publish_now.data):
-                        article_id=self.articleDB.publishArticle(article)
                         if(zipfile.is_zipfile(file_path)):
+                            extra_path=os.path.join(UPLOADEDARTICLEPATH,article_id)
                             with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                                zip_ref.extractall(os.path.abspath(file_path))
-                        return(redirect(f"/article/{article_id}"))
+                                zip_ref.extractall(os.path.abspath(extra_path))
+                            self.articleDB.publishArticle(article)
+                            os.remove(file_path)
+                            return(redirect(f"/article/{article_id}"))
+                        else:
+                            os.remove(file_path)
+                            return(self.redirect_404(error="文件格式错误"))
                     else:
-                        article_id=self.articleDB.preuploadArticle(article)
-            return(render_template("push_article.html"))
+                        article_id=self.articleDB.fetch_free_ID()
+                        if(zipfile.is_zipfile(file_path)):
+                            pass
+                        return(self.redirect_404(error="文件格式错误"))
+                return(self.redirect_404(error="表单验证失败"))
+            
+        
 
+
+        @self.app.route("/admin/edit_preupload_article")
+        @self.checklogin
+        def edit_preupload_article():
+            return(render_template("article/edit_preupload_article.html"))
 
         @self.app.route("/admin/delete_preupload_article/<id>")
         @self.checklogin
@@ -224,19 +247,29 @@ class Sever:
             os.remove(PREUPLOADPATH+folder)
             return(redirect("/admin/article"))
 
-
+        # normal
         @self.app.route("/article")
         def getArticlesPage():
-            return(render_template("article.html"))
+            return(render_template("article/article.html"))
         
-        @self.app.route("/article/<id>/<file_name>")
+        @self.app.route("/article/<int:id>/<file_name>")
         def getArticle(id:int,file_name:str):
-            return(send_from_directory(f"{ARTICLEPATH}{self.articleDB.getArticleFolderFromId(id)}",file_name))
+            id=int(id)
+            article_path=self.articleDB.getArticleFolderFromId(id)
+            if(not (article_path and self.articleDB.is_article_visible(id))):
+                return(self.redirect_404(error="未找到该文章"))
+            return(open(f"{UPLOADEDARTICLEPATH}{article_path}/{file_name}","rb").read())
 
-        @self.app.route("/article/<id>")
-        @self.checklogin
+        @self.app.route("/article/<int:id>")
         def getArticlePage(id:int):
-            return(render_template("article.html",id=id))
+            id=int(id)
+            article_path=self.articleDB.getArticleFolderFromId(id)
+            article_info=self.articleDB.getArticleFromId(id)
+            with open(os.path.join(UPLOADEDARTICLEPATH,article_path,"main.html"),"r") as file:
+                main_content=file.read()
+            if(not (article_path and self.articleDB.is_article_visible(id))):
+                return(self.redirect_404(error="未找到该文章"))
+            return(render_template("article/render_article.html",article_info=article_info,main_content=main_content,article_path=article_path))
 
 
 

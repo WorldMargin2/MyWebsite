@@ -1,0 +1,33 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <base href="/article/{{article_path}}/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/JS/jquery.js"></script>
+    <script src="/JS/marked.min.js"></script>
+    <link rel="shortcut icon" href="/ICON/WorldMargin.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/CSS/--scroll-bar.css">
+    <link rel="stylesheet" href="/CSS/github-markdown.css">
+    <link rel="stylesheet" href="/CSS/render_article.css">
+    <title>{{article_info["title"]}}</title>
+</head>
+<body>
+    {%include "header.html"%}
+    <div>
+        <div class="article_info">
+            <h1 class="article_title">{{article_info["title"]}}</h1>
+            <span>上传时间：<span class="upload_time">{{article_info["upload_time"]}}</span></span>
+            {%if article_info["topest"]%}
+            <span class="topest">置顶</span>
+            {%endif%}
+        </div>
+        <div class="main_content">
+            {{main_content|safe}}
+        </div>
+
+    </div>
+    
+    {%include "footer.html"%}
+</body>
+<script src="/JS/extend-marked.js"></script>
+</html>
