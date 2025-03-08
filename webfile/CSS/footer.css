@@ -34,5 +34,7 @@ footer a{
 footer img{
     width:1em;
     height:1em;
+    padding: 0 !important ;
+    margin: 0 !important;
 }
 

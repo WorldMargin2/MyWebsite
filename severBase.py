@@ -290,15 +290,15 @@ class Sever:
 
         # normal
         @self.app.route("/article")
-        def getArticlesPage(page:int=1,max_count:int=20):
-            articles=self.articleDB.getArticles()
+        def getArticlesPage(page:int=1):
+            articles=self.articleDB.getArticlesInfo(page)
             for i in articles:
                 i["folder"]="%05d"%(i["id"],)
-                with json.load(open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json"),"r",encoding="GBK")) as mainifest:
+                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json")) as f:
+                    mainifest=json.load(f)
                     i["head_image"]=mainifest["head_image"]
-                    i["shot_descript"]=mainifest["shot_descript"]
-
-            return(render_template("article/article.html",articles=articles,page=page,max_count=max_count))
+                    i["short_descript"]=mainifest["short_descript"]
+            return(render_template("article/article.html",articles=articles,page=page,reversed=reversed))
         
         @self.app.route("/article/<int:id>/<file_name>")
         def getArticle(id:int,file_name:str):

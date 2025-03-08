@@ -1,16 +1,27 @@
 .main_content{
     z-index: 6;
-    width: 100vw;
+    left: 10vw;
+    width: 80vw;
+    min-height: 95vh;
     height: max-content;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(2px);
+    margin-top: 3em;
+    margin-bottom: 3em;
+    border-radius: 5px;
 }
 
 .about_me{
+    padding: 5px;
+    position: absolute;
     padding-top: 30px;
-    background-color: transparent;
-    width: 100vw;
-    height: calc(100vh - 30px);
+    background-color: transparent !important;
+    height: max-content;
+    width: 100%;
     margin: 0;
+    padding: 5px;
     left: 0;
     top: 0;
-    color: #FFF;
+    overflow-x: hidden;
 }

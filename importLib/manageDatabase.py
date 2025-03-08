@@ -42,7 +42,7 @@ class ArticleDB(Database):
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "title TEXT,"
                     "upload_time TEXT,"
-                    "visible TEXT,"
+                    "visible INTEGER,"
                     "show_weight INT,"
                     "topest INTEGER"
                 ")"
@@ -133,31 +133,31 @@ class ArticleDB(Database):
                 return(res[0])
             return(None)
 
-    def getArticles(self,index_after_sort:int=0,max=20)->list[int]:
+    def getArticles(self,page:int=1)->list[int]:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
-                "select id from ARTICLE"
-                " order by show_weight desc,upload_time desc,topest desc"
-                " limit ?,? where visible=1",
-                (index_after_sort,max)
+                "SELECT id FROM ARTICLE WHERE visible=1 "
+                "ORDER BY show_weight DESC, upload_time DESC, topest DESC "
+                "LIMIT ? OFFSET ?",
+                (10, (page-1) * 10)
             )
             return(cs.fetchall())
     
-    def getArticlesInfo(self,index_after_sort:int=0,max=20)->list[dict]:
-        articles_id=self.getArticles()
+    def getArticlesInfo(self,page:int=1)->list[dict]:
+        articles_id=self.getArticles(page)
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            cs.execute(
-                "select id,title,upload_time,show_weight,topest from ARTICLE"
-                " order by show_weight desc,upload_time desc,topest desc"
-            )
-            res=zip(
-                ("id","title","upload_time","show_weight","topest"),
-                cs.fetchall()
-            )
-
-            return(res)
+            res=[]
+            for i in articles_id:
+                cs.execute(
+                    "SELECT id, title, upload_time, show_weight, topest FROM ARTICLE WHERE id = ?",
+                    (i[0],)
+                )
+                tmp=cs.fetchone()
+                print(tmp)
+                res.append(dict(zip(("id", "title", "upload_time", "show_weight", "topest"), tmp)))
+            return res
 
     def getArticleFolderFromId(self,id:int)->str:
         with dbconnect(self.db) as db:

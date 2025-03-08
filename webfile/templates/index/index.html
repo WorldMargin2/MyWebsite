@@ -9,7 +9,9 @@
     <script src="/JS/firework.js"></script>
     <script src="/JS/firework-init.js"></script>
     <link rel="stylesheet" href="/CSS/--scroll-bar.css">
-    <link rel="stylesheet" type="text/css" href="/CSS/index.css">
+    <link rel="stylesheet" href="/CSS/mdmdt.css" importance="low">
+    <link rel="stylesheet" type="text/css" href="/CSS/index-maincontent.css">
+    <link rel="stylesheet" type="text/css" href="/CSS/index.css" importance="high">
 </head>
 <body>
     <canvas id="background_canvas"></canvas>
@@ -22,8 +24,9 @@
             {%include 'clock.html'%}
         </div>
     </div>
+    <div style="height: 100vh;width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
     <div class="main_content">
-        <div style="height: 100vh;width:100%;z-index: -101;background-color: (3, 3, 3);"></div>
+        
         {%include 'index/index-main-content.html'%}
     </div>
     {%include 'footer.html'%}

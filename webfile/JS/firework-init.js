@@ -25,5 +25,5 @@ $(document).ready(() => {
     fireworks.start();
     setInterval(() => {
             fireworks.addRandomFirework();
-    }, Math.random() * 1000 + 1000);
+    }, Math.random() * 1500 + 1500);
 });
