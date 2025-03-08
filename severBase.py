@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from importLib.manageDatabase import *
 from importLib.forms import *
 import zipfile
+import json
 
 WEBFILEPATH="./webfile/"
 JSPATH=f"{WEBFILEPATH}JS/"
@@ -289,8 +290,15 @@ class Sever:
 
         # normal
         @self.app.route("/article")
-        def getArticlesPage():
-            return(render_template("article/article.html"))
+        def getArticlesPage(page:int=1,max_count:int=20):
+            articles=self.articleDB.getArticles()
+            for i in articles:
+                i["folder"]="%05d"%(i["id"],)
+                with json.load(open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json"),"r",encoding="GBK")) as mainifest:
+                    i["head_image"]=mainifest["head_image"]
+                    i["shot_descript"]=mainifest["shot_descript"]
+
+            return(render_template("article/article.html",articles=articles,page=page,max_count=max_count))
         
         @self.app.route("/article/<int:id>/<file_name>")
         def getArticle(id:int,file_name:str):

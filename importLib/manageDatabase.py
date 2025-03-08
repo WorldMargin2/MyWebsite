@@ -138,11 +138,26 @@ class ArticleDB(Database):
             cs=db.cursor()
             cs.execute(
                 "select id from ARTICLE"
-                " order by show_weight desc,topest desc,upload_time desc"
+                " order by show_weight desc,upload_time desc,topest desc"
                 " limit ?,? where visible=1",
                 (index_after_sort,max)
             )
             return(cs.fetchall())
+    
+    def getArticlesInfo(self,index_after_sort:int=0,max=20)->list[dict]:
+        articles_id=self.getArticles()
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "select id,title,upload_time,show_weight,topest from ARTICLE"
+                " order by show_weight desc,upload_time desc,topest desc"
+            )
+            res=zip(
+                ("id","title","upload_time","show_weight","topest"),
+                cs.fetchall()
+            )
+
+            return(res)
 
     def getArticleFolderFromId(self,id:int)->str:
         with dbconnect(self.db) as db:
