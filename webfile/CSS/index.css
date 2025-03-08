@@ -48,6 +48,11 @@ body{
     border-bottom: #0FF solid 1px;
 }
 
+#container>*{
+    text-decoration: none !important;
+    border: 0;
+}
+
 #container>.white_space{
     position: absolute;
     top: 0%;

@@ -12,6 +12,10 @@
     border-radius: 5px;
 }
 
+.main_content *{
+    list-style: none;
+}
+
 .about_me{
     padding: 5px;
     position: absolute;
