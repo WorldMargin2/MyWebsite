@@ -4,6 +4,7 @@
     width: 80vw;
     min-height: 95vh;
     overflow: hidden;
+    display: flex;
     height: auto;
     position: relative;
     background-color: rgba(255, 255, 255, 0.8);
@@ -11,6 +12,10 @@
     margin-top: 3em;
     margin-bottom: 3em;
     border-radius: 5px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .main_content *{
@@ -19,7 +24,7 @@
 
 .about_me{
     padding: 5px;
-    position: absolute;
+    position: relative;
     padding-top: 30px;
     background-color: transparent !important;
     height: auto;
