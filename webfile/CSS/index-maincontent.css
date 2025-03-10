@@ -22,7 +22,7 @@
     position: absolute;
     padding-top: 30px;
     background-color: transparent !important;
-    height: max-content;
+    height: auto;
     width: 100%;
     margin: 0;
     padding: 5px;
