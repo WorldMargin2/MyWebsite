@@ -42,6 +42,7 @@
 
 .bottom_content span{
     text-overflow: ellipsis;
+    white-space: nowrap;
     overflow: hidden;
     max-width: 7em;
     color: gray;
