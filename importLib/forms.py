@@ -68,7 +68,7 @@ class PushArticleForm(FlaskForm):
         validators=[InputRequired()]
     )
     publish_now=SelectField(
-        label="是否立即发布",
+        label="立即发布",
         choices=[(0, '否'), (1, '是')],
         default=1,
         validators=[InputRequired()]

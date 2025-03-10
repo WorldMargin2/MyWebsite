@@ -1,0 +1,50 @@
+.form_container{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
+form>div{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+}
+
+form>div:last-child{
+    justify-content: center;
+}
+
+form>div>span{
+    text-align: justify;
+    text-align-last: justify;
+}
+
+form>div>label{
+    /* display: inline-flex; */
+    width: 4em;
+    text-align: justify;
+    text-align-last: justify;
+}
+
+
+
+/* 
+form>div>span{
+    width: 20%;
+    text-align: center;
+} */

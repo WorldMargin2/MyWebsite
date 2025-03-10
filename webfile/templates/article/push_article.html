@@ -3,20 +3,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUSH ARTICLE</title>
+    <link rel="stylesheet" href="/CSS/push_article.css">
     <script src="/JS/jquery.js"></script>
 </head>
 <body>
     {%include 'header.html'%}
-    <div style="max-height: 100vh;min-height: 95vh;">
+    <div class="form_container"  style="max-height: 100vh;min-height: 95vh;">
         <form action="" method="post" enctype="multipart/form-data">
             {{form.csrf_token()}}
-            <div>{{form.title.label}}       {{form.title}}      </div>
-            <div>{{form.show_weight.label}} {{form.show_weight}}</div>
-            <div>{{form.topest.label}}      {{form.topest}}     </div>
-            <div>{{form.publish_now.label}} {{form.publish_now}}</div>
-            <div>{{form.visible.label}}    {{form.visible}}   </div>
-            <div>{{form.zipfile}}</div>
-            <div>{{form.submit}}</div>
+            <div>   {{form.title.label}}        <span>{{form.title}}      </span>    </div>
+            <div>   {{form.show_weight.label}}  <span>{{form.show_weight}}</span>    </div>
+            <div>   {{form.topest.label}}       <span>{{form.topest}}     </span>    </div>
+            <div>   {{form.publish_now.label}}  <span>{{form.publish_now}}</span>    </div>
+            <div>   {{form.visible.label}}      <span>{{form.visible}}    </span>    </div>
+            <div>   {{form.zipfile}}                                    </div>
+            <div>   {{form.submit}}                                     </div>
         </form>
     </div>
     {%include 'footer.html'%}   
