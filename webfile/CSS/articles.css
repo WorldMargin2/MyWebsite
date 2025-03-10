@@ -60,7 +60,7 @@
     justify-content: flex-start;
 }
 
-a{
+.article_container a{
     text-decoration: none;
     display: block;
 }
