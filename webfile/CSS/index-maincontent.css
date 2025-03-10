@@ -3,7 +3,8 @@
     left: 10vw;
     width: 80vw;
     min-height: 95vh;
-    height: max-content;
+    overflow: hidden;
+    height: auto;
     position: relative;
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(2px);
