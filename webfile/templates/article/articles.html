@@ -11,7 +11,7 @@
     {%include "header.html"%}
     <div class="article_container" style="min-height: 95vh;">
         {%for article in reversed(articles)%}
-            <a href="{{article['folder']}}">
+            <a href="article/{{article['folder']}}">
                 <div class="article">
                     <div class="top_content">
                         <div class="left_content">
@@ -24,7 +24,6 @@
                                 {%if article["topest"]%}
                                 <span class="topest">置顶</span>
                                 {%endif%}
-                                
                             </div>
                         </div>
                     </div>
@@ -33,8 +32,6 @@
                     </div>
                 </div>
             </a>
-            
-            
         {%endfor%}
     </div>
     {%include "footer.html"%}

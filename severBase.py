@@ -205,8 +205,6 @@ class Sever:
                 return(render_template("admin/edit_name_pwd.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
 
 
-
-
     def redirect_404(self,error=None):
         return(redirect(url_for("notFound",error=error)))
 
@@ -263,8 +261,6 @@ class Sever:
                             pass
                         return(self.redirect_404(error="文件格式错误"))
                 return(self.redirect_404(error="表单验证失败"))
-            
-        
         
 
         @self.app.route("/admin/edit_preupload_article")
@@ -289,7 +285,8 @@ class Sever:
             return(redirect("/admin/article"))
 
         # normal
-        @self.app.route("/article")
+        @self.app.route("/articles")
+        @self.app.route("/articles/<int:page>")
         def getArticlesPage(page:int=1):
             articles=self.articleDB.getArticlesInfo(page)
             for i in articles:
