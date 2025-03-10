@@ -295,7 +295,7 @@ class Sever:
                     mainifest=json.load(f)
                     i["head_image"]=mainifest["head_image"]
                     i["short_descript"]=mainifest["short_descript"]
-            return(render_template("article/article.html",articles=articles,page=page,reversed=reversed))
+            return(render_template("article/articles.html",articles=articles,page=page,reversed=reversed))
         
         @self.app.route("/article/<int:id>/<file_name>")
         def getArticle(id:int,file_name:str):
