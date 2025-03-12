@@ -5,14 +5,11 @@ import time
 import random
 from flask import Request
 from werkzeug.security import generate_password_hash,check_password_hash
+from .const_path import *
 
 
 
 
-DATABASEPATH="./database/"
-
-USERDB=f"{DATABASEPATH}user.db"
-ARTICLEDB=f"{DATABASEPATH}article.db"
 
 
 class Database:
@@ -132,6 +129,27 @@ class ArticleDB(Database):
             if(res):
                 return(res[0])
             return(None)
+        
+    def admin_getArticles(self,page:int=1)->list[int]:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "SELECT id FROM ARTICLE "
+                "ORDER BY show_weight DESC, upload_time DESC, topest DESC "
+                "LIMIT ? OFFSET ?",
+                (10, (page-1) * 10)
+            )
+            return(cs.fetchall())
+    
+    def getAllArticles(self)->list[int]:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "SELECT id FROM ARTICLE "
+                "ORDER BY show_weight DESC, upload_time DESC, topest DESC "
+            )
+            return(cs.fetchall())
+        
 
     def getArticles(self,page:int=1)->list[int]:
         with dbconnect(self.db) as db:

@@ -36,9 +36,61 @@ form>div>span{
 
 form>div>label{
     /* display: inline-flex; */
-    width: 4em;
     text-align: justify;
     text-align-last: justify;
+    color: gray;
+    width: 4em;
+}
+
+form>div>span{
+    width: 60%;
+}
+
+
+input,select,textarea{
+    font-size: 20px;
+    margin-bottom: 20px;
+    outline-style: none ;
+    border: 1px solid #ccc; 
+    border-radius: 3px;
+    padding: 6px;
+    width: 100%;
+    transition: all 0.5s;
+    caret-color: aqua;
+    color: gray;
+}
+
+input:focus,select:focus,textarea:focus{
+    border-color: #66afe9;
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6)
+}
+
+input[type="submit"]{
+    padding-left: 10px;
+    padding-right: 10px;
+    width: auto;
+    color: gray;
+    background-color: transparent;
+    font-weight: 700;
+    /* background-color: aqua; */
+}
+
+input[type="submit"]:hover{
+    transform: scale(1.1);
+    transition: all 0.5s;
+}
+
+
+*::selection {
+	background-color: rgba(128, 128, 128,0.3);
+	backdrop-filter: blur(0.3px);
+}
+
+input[type="file"] *{
+    outline: none;
+    border: none;
 }
 
 

@@ -3,22 +3,13 @@ from flask import Flask,jsonify,render_template,redirect,make_response, send_fro
 from flask import request, session,url_for,abort,send_file,flash,get_flashed_messages
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
-from importLib.manageDatabase import *
-from importLib.forms import *
 import zipfile
 import json
+from importLib.const_path import *
+from importLib.manageDatabase import *
+from importLib.version_update import Version
+from importLib.forms import *
 
-WEBFILEPATH="./webfile/"
-JSPATH=f"{WEBFILEPATH}JS/"
-CSSPATH=f"{WEBFILEPATH}CSS/"
-ICONPATH=f"{WEBFILEPATH}ICON/"
-IMAGEPATH=f"{WEBFILEPATH}images/"
-DATABASEPATH="./database/"
-HTMLPATH=f"{WEBFILEPATH}HTML/"
-LICENSESPATH=f"{WEBFILEPATH}LICENSES/"
-ARTICLEPATH=f"{WEBFILEPATH}ARTICLES/"
-UPLOADEDARTICLEPATH=f"{ARTICLEPATH}UPLOADED/"
-PREUPLOADPATH=f"{ARTICLEPATH}PREUPLOAD/"
 
 
 
@@ -44,6 +35,7 @@ class Sever:
         init_folder()
         self.userDB=UserDB()
         self.articleDB=ArticleDB()
+        self.version=Version(self.userDB,self.articleDB)
         self.handle_event()
         self.getStatic()
         self.main()
@@ -223,7 +215,7 @@ class Sever:
 
     def article_url(self):
         # admin required
-        @self.app.route("/admin/push_article",methods=["GET","POST"])
+        @self.app.route("/admin/article/push_article",methods=["GET","POST"])
         @self.checklogin
         def push_article():
             article_id:int=0
@@ -261,6 +253,12 @@ class Sever:
                             pass
                         return(self.redirect_404(error="文件格式错误"))
                 return(self.redirect_404(error="表单验证失败"))
+            
+        @self.app.route("/admin/articles")
+        @self.checklogin
+        def manage_articles(self):
+            
+            pass
         
 
         @self.app.route("/admin/edit_preupload_article")
