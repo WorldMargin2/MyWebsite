@@ -33,17 +33,16 @@ class Sever:
         self.app.config["SECRET_KEY"]="SOCITY"
         self.csrf=CSRFProtect(self.app)
         init_folder()
-        self.userDB=UserDB()
+        self.adminDB=AdminDB()
         self.articleDB=ArticleDB()
-        self.version=Version(self.userDB,self.articleDB)
+        self.version=Version(self.adminDB,self.articleDB)
         self.handle_event()
         self.getStatic()
         self.main()
         self.article_url()
         self.admin_url()
         self.start()
-        
-    
+  
     def start(self):
         self.app.run("0.0.0.0",80,debug=True)
 
@@ -141,17 +140,17 @@ class Sever:
                 return(render_template("admin/admin-logout.html", form=form))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
-                for i in self.userDB.clear_refuse():
+                for i in self.adminDB.clear_refuse():
                     response.set_cookie(i[0], "", expires=0)
                 response.set_cookie("admin_name", "", expires=0)
-                response.set_cookie(self.userDB.get_config("password_key"), "", expires=0)
+                response.set_cookie(self.adminDB.get_config("password_key"), "", expires=0)
                 return response
             return(redirect("/404",error="表单验证失败"))
             
         
         @self.app.route("/admin/login",methods=["GET","POST"])
         def admin_login():
-            if(self.userDB.check_longin(request.cookies)):
+            if(self.adminDB.check_longin(request.cookies)):
                 return(redirect("/admin"))
             errors = []
             err=request.args.get("error")
@@ -159,7 +158,7 @@ class Sever:
                 errors.append(err)
             form = AdminLoginForm()
             if form.validate_on_submit():
-                login_result = self.userDB.login(form.admin_name.data, form.password.data, request.remote_addr)
+                login_result = self.adminDB.login(form.admin_name.data, form.password.data, request.remote_addr)
                 if login_result:
                     response = make_response(redirect("/admin"))
                     for key, value in login_result.items():
@@ -181,16 +180,16 @@ class Sever:
             else:
                 origin_name=request.cookies.get("admin_name")
                 if(name_form.validate_on_submit()):
-                    self.userDB.change_name(origin_name,name_form.data)
+                    self.adminDB.change_name(origin_name,name_form.data)
                     response=make_response(redirect("/admin"))
                     response.set_cookie("admin_name",name_form.data,max_age=60 * 60 * 24 * 7)
                     return(response)
                 elif(pwd_form.validate_on_submit()):
-                    if(self.userDB.check_pwd(origin_name,pwd_form.origin_password.data)):
+                    if(self.adminDB.check_pwd(origin_name,pwd_form.origin_password.data)):
                         response=make_response(redirect("/admin"))
-                        for i in self.userDB.clear_refuse():
+                        for i in self.adminDB.clear_refuse():
                             response.set_cookie(i[0], "", expires=0)
-                        res=self.userDB.change_password(origin_name,pwd_form.password.data)
+                        res=self.adminDB.change_password(origin_name,pwd_form.password.data)
                         for i in res.items():
                             response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
                         return(response)
@@ -204,7 +203,7 @@ class Sever:
         def checklogin_decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
-                if(self.userDB.check_longin(request.cookies)):
+                if(self.adminDB.check_longin(request.cookies)):
                     return(f(*args, **kwargs))
                 else:
                     return(redirect(url_for("admin_login",error="未登录")))
@@ -254,12 +253,53 @@ class Sever:
                         return(self.redirect_404(error="文件格式错误"))
                 return(self.redirect_404(error="表单验证失败"))
             
-        @self.app.route("/admin/articles")
+        @self.app.route("/admin/articles/<int:page>")
+        @self.app.route("/admin/articles/")
         @self.checklogin
-        def manage_articles(self):
-            
-            pass
-        
+        def manage_articles(page=0):
+            articles=self.articleDB.getArticlesInfo(page)
+            for i in articles:
+                i["folder"]="%05d"%(i["id"],)
+                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json")) as f:
+                    mainifest=json.load(f)
+                    i["head_image"]=mainifest["head_image"]
+                    i["short_descript"]=mainifest["short_descript"]
+            return(render_template("article/manage_article.html",articles=articles,page=page,reversed=reversed))
+
+        @self.app.route("/admin/edit_article/<int:id>",methods=["GET","POST"])
+        @self.checklogin
+        def edit_article(id:int=0):
+            id=int(id)
+            form = EditArticleForm()
+            if(request.method=="GET"):
+                return(render_template("article/edit_article.html",form=form))
+            else:
+                if (form.validate_on_submit()):
+                    article=dict()
+                    article["title"]=form.title.data
+                    article["topest"]=form.topest.data
+                    article["show_weight"]=form.show_weight.data
+                    article["visible"]=form.visible.data
+                    zip_file=request.files["zipfile"]
+                    self.articleDB.editArticle(id,article=article)
+                    article_path=self.articleDB.getArticleFolderFromId(id)
+                    if(not article_path):
+                        return(self.redirect_404(error="未找到文章"))
+                    if(zipfile.is_zipfile(zip_file)):
+                        with open(f"{UPLOADEDARTICLEPATH}{article_path}/mainifest.json","r",encoding="GBK") as j:
+                            old_registed_files=json.load(j)
+                        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                            zip_ref.extractall(os.path.abspath(UPLOADEDARTICLEPATH+article_path))
+                        with open(f"{UPLOADEDARTICLEPATH}{article_path}/mainifest.json","w",encoding="GBK") as j:
+                            new_registed_files=json.load(j)
+                        old_registed_files=set(old_registed_files)
+                        new_registed_files=set(new_registed_files)
+                        for file in old_registed_files-new_registed_files:
+                            os.remove(f"{UPLOADEDARTICLEPATH}{article_path}/{file}")
+                return(redirect("/admin/articles"))
+
+
+
 
         @self.app.route("/admin/edit_preupload_article")
         @self.checklogin
@@ -274,13 +314,26 @@ class Sever:
             os.remove(PREUPLOADPATH+folder)
             return(redirect("/admin/article"))
 
-        @self.app.route("/admin/delete_article/<id>")
+        @self.app.route("/admin/delete_article/<int:id>",methods=["POST","GET"])
         @self.checklogin
         def delete_article(id:int):
-            folder=self.articleDB.getArticleFolderFromId(id)
-            self.articleDB.deleteArticle(id)
-            os.remove(UPLOADEDARTICLEPATH+folder)
-            return(redirect("/admin/article"))
+            id=int(id)
+            submit_form=SubmitForm()
+            if(request.method=="GET"):
+                return(render_template(
+                    "article/delete_article.html",
+                    id=id,
+                    title="删除文章",
+                    submit_form=submit_form,
+                    tip=f"您正在执行不可逆操作",
+                    opration=f"删除文章{'%05d'%(id,)}。"
+                ))
+            else:
+                if(submit_form.validate_on_submit()):
+                    folder=self.articleDB.getArticleFolderFromId(id)
+                    os.remove(UPLOADEDARTICLEPATH+folder)
+                    self.articleDB.deleteArticle(id)
+                    return(redirect("/admin/articles"))
 
         # normal
         @self.app.route("/articles")

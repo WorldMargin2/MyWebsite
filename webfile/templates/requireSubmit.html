@@ -1,0 +1,8 @@
+
+<link rel="stylesheet" href="/CSS/requireSubmit.css">
+<form action="" method="post">
+    <h2>{{tip}}:<span>{{opration}}</span> &nbsp;是否继续？</h2>
+    <button onclick="window.history.back">取消</button>
+    {{submit_form.csrf_token()}}
+    {{submit_form.submit}}
+</form>

@@ -1,0 +1,42 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/JS/marked.min.js"></script>
+    <script src="/JS/jquery.js"></script>
+    <link rel="stylesheet" href="/CSS/articles.css">
+    <title>Articles</title>
+</head>
+<body>
+    {%include "header.html"%}
+    <div class="article_container" style="min-height: 95vh;">
+        {%for article in reversed(articles)%}
+                <div class="article">
+                    <div class="top_content">
+                        <div class="left_content">
+                            <img src="{{article['img'] if article[img] else '/ICON/head_image.jpg'}}" alt="">
+                        </div>
+                        <div class="right_content">
+                            <h3>{{article["title"]}}</h3>
+                            <div class="article_info">
+                                <span class="upload_time">{{article["upload_time"]}}</span>
+                                {%if article["topest"]%}
+                                <span class="topest">置顶</span>
+                                {%endif%}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bottom_content">
+                        <span>{{article["short_descript"] if article["short_descript"] else '...'}}</span>
+                        <span class="opration_menu">
+                            <a href="/admin/edit_article/{{i['id']}}">编辑</a>
+                            <a href="/admin/delete_article/{{i['id}}">删除</a>
+                        </span>
+                    </div>
+                </div>
+        {%endfor%}
+    </div>
+    {%include "footer.html"%}
+    
+</body>
+</html>

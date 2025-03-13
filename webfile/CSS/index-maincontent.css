@@ -2,6 +2,7 @@
     z-index: 6;
     left: 10vw;
     width: 80vw;
+    padding: 10px;
     min-height: 95vh;
     overflow: hidden;
     display: flex;
@@ -23,7 +24,7 @@
 }
 
 .about_me{
-    padding: 5px;
+    padding: 10px;
     position: relative;
     padding-top: 30px;
     background-color: transparent !important;

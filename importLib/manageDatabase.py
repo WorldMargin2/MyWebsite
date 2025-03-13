@@ -85,6 +85,26 @@ class ArticleDB(Database):
             )
             db.commit()
 
+    def editArticle(self,id:int,article:dict):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute(
+                "UPDATE ARTICLE SET "
+                    "title=?,"
+                    "visible=?,"
+                    "show_weight=?,"
+                    "topest=?"
+                " WHERE id=?",
+                (
+                    article["title"],
+                    article["visible"],
+                    article["show_weight"],
+                    article["topest"],
+                    id
+                )
+            )
+            db.commit()
+
     def deleteArticle(self,id):
         with dbconnect(self.db) as db:
             cs=db.cursor()
@@ -117,7 +137,7 @@ class ArticleDB(Database):
                 )
             )
             db.commit()
-        
+
     def is_article_visible(self,id:int):
         with dbconnect(self.db) as db:
             cs=db.cursor()
@@ -141,7 +161,7 @@ class ArticleDB(Database):
             )
             return(cs.fetchall())
     
-    def getAllArticles(self)->list[int]:
+    def getAllArticle(self)->list[int]:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute(
@@ -149,7 +169,6 @@ class ArticleDB(Database):
                 "ORDER BY show_weight DESC, upload_time DESC, topest DESC "
             )
             return(cs.fetchall())
-        
 
     def getArticles(self,page:int=1)->list[int]:
         with dbconnect(self.db) as db:
@@ -239,8 +258,8 @@ class ArticleDB(Database):
                 )
             return(None)
 
-class UserDB(Database):
-    db=USERDB
+class AdminDB(Database):
+    db=ADMINDB
     max_salt_count=10
     max_log_count=50
     max_pass_error_count=5

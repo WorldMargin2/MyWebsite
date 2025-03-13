@@ -86,3 +86,36 @@ class PushArticleForm(FlaskForm):
         validators=[InputRequired()]
     )
     submit = SubmitField("提交")
+
+class EditArticleForm(FlaskForm):
+    title = StringField(
+        label="标题",
+        render_kw={"placeholder": "请输入标题"},
+        validators=[InputRequired()]
+    )
+    show_weight=IntegerField(
+        label="权重",
+        render_kw={"placeholder": "请输入权重"},
+        validators=[InputRequired()],
+        default=0
+    )
+    topest=SelectField(
+        label="是否置顶",
+        choices=[(0, '否'), (1, '是')],
+        default=1,
+        validators=[InputRequired()]
+    )
+    visible=SelectField(
+        label="是否可见",
+        choices=[(0, '否'), (1, '是')],
+        default=1,
+        validators=[InputRequired()]
+    )
+    submit = SubmitField("提交")
+    zipfile = FileField(
+        "修改文件"
+    )
+
+
+class SubmitForm(FlaskForm):
+    submit=SubmitField("继续")
