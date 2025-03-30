@@ -3,6 +3,7 @@ from flask import Flask,jsonify,render_template,redirect,make_response, send_fro
 from flask import request, session,url_for,abort,send_file,flash,get_flashed_messages
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.utils import secure_filename
+import base64
 import zipfile
 import json
 from importLib.const_path import *
@@ -130,6 +131,20 @@ class Sever:
                     admin_name=request.cookies.get("admin_name")
                 )
             )
+        
+        @self.app.route("/secret")
+        @self.app.route("/secret/<str:secret_string>")
+        def getSecret(secret_string:str=None):
+            # 解密sha256文字
+            if(secret_string):
+                try:
+                    secret_string=base64.b64decode(secret_string).decode("GBK")
+                except:
+                    secret_string=None
+            else:
+                secret_string=None
+            return(render_template("secret.html",secret_string=secret_string))
+
 
     def admin_url(self):    
         @self.app.route("/admin/logout", methods=["POST","GET"])
@@ -209,8 +224,6 @@ class Sever:
                     return(redirect(url_for("admin_login",error="未登录")))
             return(decorated_function)
         self.checklogin=checklogin_decorator
-
-
 
     def article_url(self):
         # admin required
