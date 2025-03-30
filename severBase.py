@@ -133,12 +133,14 @@ class Sever:
             )
         
         @self.app.route("/secret")
-        @self.app.route("/secret/<str:secret_string>")
+        @self.app.route("/secret/")
+        @self.app.route("/secret/<secret_string>")
         def getSecret(secret_string:str=None):
             # 解密sha256文字
             if(secret_string):
+                print(secret_string)
                 try:
-                    secret_string=base64.b64decode(secret_string).decode("GBK")
+                    secret_string=base64.b64decode(secret_string).decode("utf-8")
                 except:
                     secret_string=None
             else:
