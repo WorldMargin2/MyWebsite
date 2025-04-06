@@ -3,21 +3,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>修改账号</title>
+    <script src="/JS/jquery.js"></script>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            min-width: 50%;
+        }
+        .container * {
+            transition: all 0.3s ease;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+        input[type="text"],
+        input[type="password"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #5cb85c;
+            outline: none;
+        }
+        input[type="submit"] {
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
+    {%include 'header.html'%}
 <body>
-    <form action="" method="POST">
-        <h1>修改名称</h1>
-        {{name_form.csrf_token()}}
-        {{name_form.admin_name}}
-        {{name_form.submit}}
-    </form>
-    <form action="" method="POST">
-        <h1>修改密码</h1>
-        {{pwd_form.csrf_token()}}
-        {{pwd_form.origin_password}}
-        {{pwd_form.password}}
-        {{pwd_form.password_confirm}}
-        {{pwd_form.submit}}
-    </form>
+    <div class="container">
+        <form action="" method="POST">
+            <h1>修改名称</h1>
+            {{name_form.csrf_token()}}
+            {{name_form.admin_name}}
+            {%for err in name_errs%}
+                <div style="color: red;">{{err}}</div>
+            {%endfor%}
+            {{name_form.submit}}
+        </form>
+        <form action="" method="POST">
+            <h1>修改密码</h1>
+            {{pwd_form.csrf_token()}}
+            {{pwd_form.origin_password}}
+            {{pwd_form.password}}
+            {{pwd_form.password_confirm}}
+            {%for err in pwd_errs%}
+                <div style="color: red;">{{err}}</div>
+            {%endfor%}
+            {{pwd_form.submit}}
+        </form>
+    </div>
+    
 </body>
 </html>

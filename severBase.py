@@ -123,6 +123,7 @@ class Sever:
             return(render_template("index/index.html"))
 
         @self.app.route("/admin")
+        @self.app.route("/admin/")
         @self.checklogin
         def getAdminPage():
             return(
@@ -197,18 +198,34 @@ class Sever:
             else:
                 origin_name=request.cookies.get("admin_name")
                 if(name_form.validate_on_submit()):
-                    self.adminDB.change_name(origin_name,name_form.data)
-                    response=make_response(redirect("/admin"))
-                    response.set_cookie("admin_name",name_form.data,max_age=60 * 60 * 24 * 7)
+                    if(name_form.admin_name.data==origin_name):
+                        name_errs.append("新用户名与当前用户名相同")
+                    elif(name_form.admin_name.data ==""):
+                        name_errs.append("用户名不能为空")
+                    elif(not validaters.change_name_validater(name_form.admin_name.data)):
+                        name_errs.append("用户名不合法")
+                    else:
+                        response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
+                        self.adminDB.change_name(origin_name,name_form.admin_name.data)
+                        response.set_cookie("admin_name",name_form.admin_name.data,max_age=60 * 60 * 24 * 7)
+                        return(response)
+                    response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
                     return(response)
                 elif(pwd_form.validate_on_submit()):
                     if(self.adminDB.check_pwd(origin_name,pwd_form.origin_password.data)):
-                        response=make_response(redirect("/admin"))
-                        for i in self.adminDB.clear_refuse():
-                            response.set_cookie(i[0], "", expires=0)
-                        res=self.adminDB.change_password(origin_name,pwd_form.password.data)
-                        for i in res.items():
-                            response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
+                        if(pwd_form.password.data==pwd_form.origin_password.data):
+                            pwd_errs.append("新密码与当前密码相同")
+                        elif(pwd_form.password.data==""):
+                            pwd_errs.append("新密码不能为空")
+                        else:
+                            response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
+                            for i in self.adminDB.clear_refuse():
+                                response.set_cookie(i[0], "", expires=0)
+                            res=self.adminDB.change_password(origin_name,pwd_form.password.data)
+                            for i in res.items():
+                                response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
+                                return(response)
+                        response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
                         return(response)
                 return(render_template("admin/edit_name_pwd.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
 

@@ -6,6 +6,15 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, InputRequir
 
 
 
+class validaters:
+    def change_name_validater(name:str=""):
+        for i in name:
+            if( i.isalnum() or i in ["_", "-"]):
+                continue
+            else:
+                return False
+        return True
+
 
 class AdminLoginForm(FlaskForm):
     admin_name = StringField(
