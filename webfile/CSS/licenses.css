@@ -40,6 +40,7 @@ body{
 }
 
 table {
+    table-layout: fixed;
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
@@ -49,6 +50,11 @@ tr{
     border-radius: 10px;
 }
 
+thead{
+    position: sticky;
+    top: 0;
+    background-color: rgba(255,255,255, 0.8);
+}
 
 table > thead > tr > td {
     background-color: #424242;
