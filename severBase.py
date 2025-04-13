@@ -104,7 +104,6 @@ class Sever:
             return(render_template("licenses.html",licenses=licenses))
 
     def main(self):
-
         @self.app.errorhandler(404)
         @self.app.route("/404")
         def notFound(error=None):
@@ -148,6 +147,19 @@ class Sever:
                 secret_string=None
             return(render_template("secret.html",secret_string=secret_string))
 
+        @self.app.route("/love")
+        def getLove():
+            if(request.args.get("content")):
+                love=request.args.get("content")
+                now_time=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                ip=request.remote_addr
+                with open("choose.txt","a",encoding="utf-8") as file:
+                    file.write(f"{now_time}:{love}:{ip}\n")
+                return(redirect("/love"))
+            else:
+                with open("choose.txt","r+",encoding="utf-8") as file:
+                    log=file.readlines()
+                    return("<br/>".join(log))
 
     def admin_url(self):    
         @self.app.route("/admin/logout", methods=["POST","GET"])
