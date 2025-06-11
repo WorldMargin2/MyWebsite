@@ -28,15 +28,44 @@
                     </div>
                     <div class="bottom_content">
                         <span>{{article["short_descript"] if article["short_descript"] else '...'}}</span>
-                        <span class="opration_menu">
-                            <a href="/admin/edit_article/{{i['id']}}">编辑</a>
-                            <a href="/admin/delete_article/{{i['id}}">删除</a>
+                        <span class="operation_menu">
+                            <span class="tip">操作</span>
+                            <div class="operation_container">
+                                <span class="operation_list">
+                                    <a href="/admin/edit_article/{{article['id']}}">编辑</a>
+                                    <a href="/admin/delete_article/{{article['id']}}">删除</a>
+                                </span>
+                            </div>
                         </span>
                     </div>
                 </div>
         {%endfor%}
     </div>
     {%include "footer.html"%}
-    
 </body>
+<script>
+    $(document).ready(function() {
+        $(".operation_menu").on("mouseenter", function() {
+            let operation_container = $(this).find(".operation_container");
+            operation_container.css({
+                "display": "block"
+            });
+            let operation_list = $(this).find(".operation_list");
+            let height = operation_list.height();
+            operation_container.stop().animate({
+                "height": height + "px"
+            },200);
+        });
+        $(".operation_menu").on("mouseleave", function() {
+            let operation_container = $(this).find(".operation_container");
+            operation_container.stop().animate({
+                "height": "0px"
+            }, 200, function() {
+                operation_container.css({
+                    "display": "none"
+                });
+            });
+        });
+    });
+</script>
 </html>

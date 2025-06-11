@@ -1,8 +1,65 @@
-
 <link rel="stylesheet" href="/CSS/requireSubmit.css">
-<form action="" method="post">
+<style>
+/* 页面美化样式 */
+.require-submit-container {
+    max-width: 400px;
+    margin: 80px auto 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 24px 24px 24px;
+    text-align: center;
+}
+.require-submit-container h2 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 32px;
+    font-weight: 500;
+    word-break: break-all;
+    white-space: normal;
+    line-height: 1.6;
+    /* 新增：防止超出 */
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+.require-submit-container h2 span {
+    color: #007bff;
+    font-weight: bold;
+    word-break: break-all;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+.require-submit-container button,
+.require-submit-container input[type="submit"] {
+    min-width: 90px;
+    padding: 8px 0;
+    margin: 0 12px;
+    border: none;
+    border-radius: 4px;
+    background: #f0f0f0;
+    color: #333;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.require-submit-container button:hover,
+.require-submit-container input[type="submit"]:hover {
+    background: #007bff;
+    color: #fff;
+}
+.require-submit-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+</style>
+<form action="" method="post" class="require-submit-container">
     <h2>{{tip}}:<span>{{opration}}</span> &nbsp;是否继续？</h2>
-    <button onclick="window.history.back">取消</button>
-    {{submit_form.csrf_token()}}
-    {{submit_form.submit}}
+    <div class="require-submit-actions">
+        <button type="button" onclick="window.history.back()">取消</button>
+        {{submit_form.csrf_token()}}
+        {{submit_form.submit}}
+    </div>
 </form>

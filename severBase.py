@@ -45,7 +45,7 @@ class Sever:
         self.start()
   
     def start(self):
-        self.app.run("0.0.0.0",80,debug=True)
+        self.app.run("0.0.0.0",80,debug=True,threaded=True)
 
 
     def getStatic(self):
@@ -138,7 +138,6 @@ class Sever:
         def getSecret(secret_string:str=None):
             # 解密sha256文字
             if(secret_string):
-                print(secret_string)
                 try:
                     secret_string=base64.b64decode(secret_string).decode("utf-8")
                 except:
@@ -165,9 +164,9 @@ class Sever:
         @self.app.route("/admin/logout", methods=["POST","GET"])
         @self.checklogin
         def admin_logout():
-            form=AdminLogoutForm()
+            form=SubmitForm()
             if(request.method=="GET"):
-                return(render_template("admin/admin-logout.html", form=form))
+                return(render_template("/requireSubmit.html", submit_form=form,tip="您正在执行",opration="退出登录"))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
                 for i in self.adminDB.clear_refuse():
@@ -267,15 +266,16 @@ class Sever:
                 return(render_template("article/push_article.html",form=form))
             else:
                 if (form.validate_on_submit()):
+                    upload_time=time.localtime()
                     article=dict()
                     article["title"]=form.title.data
-                    article["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+                    article["upload_time"]=time.localtime()
                     article["topest"]=form.topest.data
                     article["show_weight"]=form.show_weight.data
                     article["publish_now"]=form.publish_now.data
                     article["visible"]=form.visible.data
                     zip_file=request.files["zipfile"]
-                    article_id="%05d"%(self.articleDB.fetch_free_ID() or 1 ,)
+                    article_id=get_hash_code(article["upload_time"])
                     article["id"]=article_id
                     file_path=os.path.join(PREUPLOADPATH,article_id)
                     zip_file.save(file_path)
@@ -291,7 +291,6 @@ class Sever:
                             os.remove(file_path)
                             return(self.redirect_404(error="文件格式错误"))
                     else:
-                        article_id=self.articleDB.fetch_free_ID()
                         if(zipfile.is_zipfile(file_path)):
                             pass
                         return(self.redirect_404(error="文件格式错误"))
@@ -303,22 +302,24 @@ class Sever:
         def manage_articles(page=0):
             articles=self.articleDB.getArticlesInfo(page)
             for i in articles:
-                i["folder"]="%05d"%(i["id"],)
-                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json")) as f:
+                i["folder"]=i["id"]
+                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json"),encoding="UTF-8") as f:
                     mainifest=json.load(f)
                     i["head_image"]=mainifest["head_image"]
                     i["short_descript"]=mainifest["short_descript"]
+                    i["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(i["upload_time"]))
             return(render_template("article/manage_article.html",articles=articles,page=page,reversed=reversed))
 
-        @self.app.route("/admin/edit_article/<int:id>",methods=["GET","POST"])
+        @self.app.route("/admin/edit_article/<id>",methods=["GET","POST"])
         @self.checklogin
-        def edit_article(id:int=0):
-            id=int(id)
+        def edit_article(id:str):
             form = EditArticleForm()
             if(request.method=="GET"):
                 return(render_template("article/edit_article.html",form=form))
             else:
                 if (form.validate_on_submit()):
+                    if(not self.articleDB.validateArticleId(id)):
+                        return(self.redirect_404(error="未找到文章"))
                     article=dict()
                     article["title"]=form.title.data
                     article["topest"]=form.topest.data
@@ -326,20 +327,20 @@ class Sever:
                     article["visible"]=form.visible.data
                     zip_file=request.files["zipfile"]
                     self.articleDB.editArticle(id,article=article)
-                    article_path=self.articleDB.getArticleFolderFromId(id)
-                    if(not article_path):
+                    folder=article["id"]
+                    if(not folder):
                         return(self.redirect_404(error="未找到文章"))
                     if(zipfile.is_zipfile(zip_file)):
-                        with open(f"{UPLOADEDARTICLEPATH}{article_path}/mainifest.json","r",encoding="GBK") as j:
+                        with open(f"{UPLOADEDARTICLEPATH}{folder}/mainifest.json","r",encoding="UTF-8") as j:
                             old_registed_files=json.load(j)
                         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-                            zip_ref.extractall(os.path.abspath(UPLOADEDARTICLEPATH+article_path))
-                        with open(f"{UPLOADEDARTICLEPATH}{article_path}/mainifest.json","w",encoding="GBK") as j:
+                            zip_ref.extractall(os.path.abspath(UPLOADEDARTICLEPATH+folder))
+                        with open(f"{UPLOADEDARTICLEPATH}{folder}/mainifest.json","w",encoding="UTF-8") as j:
                             new_registed_files=json.load(j)
                         old_registed_files=set(old_registed_files)
                         new_registed_files=set(new_registed_files)
                         for file in old_registed_files-new_registed_files:
-                            os.remove(f"{UPLOADEDARTICLEPATH}{article_path}/{file}")
+                            os.remove(f"{UPLOADEDARTICLEPATH}{folder}/{file}")
                 return(redirect("/admin/articles"))
 
 
@@ -352,16 +353,15 @@ class Sever:
 
         @self.app.route("/admin/delete_preupload_article/<id>")
         @self.checklogin
-        def delete_preupload_article(id:int):
-            folder=self.articleDB.getPreuploadFolderFromId(id)
+        def delete_preupload_article(id:str):
+            folder=id
             self.articleDB.delete_preuploadArticle(id)
             os.remove(PREUPLOADPATH+folder)
             return(redirect("/admin/article"))
 
-        @self.app.route("/admin/delete_article/<int:id>",methods=["POST","GET"])
+        @self.app.route("/admin/delete_article/<id>",methods=["POST","GET"])
         @self.checklogin
-        def delete_article(id:int):
-            id=int(id)
+        def delete_article(id:str):
             submit_form=SubmitForm()
             if(request.method=="GET"):
                 return(render_template(
@@ -370,11 +370,11 @@ class Sever:
                     title="删除文章",
                     submit_form=submit_form,
                     tip=f"您正在执行不可逆操作",
-                    opration=f"删除文章{'%05d'%(id,)}。"
+                    opration=f"删除文章{id}。"
                 ))
             else:
                 if(submit_form.validate_on_submit()):
-                    folder=self.articleDB.getArticleFolderFromId(id)
+                    folder=id
                     os.remove(UPLOADEDARTICLEPATH+folder)
                     self.articleDB.deleteArticle(id)
                     return(redirect("/admin/articles"))
@@ -385,31 +385,33 @@ class Sever:
         def getArticlesPage(page:int=1):
             articles=self.articleDB.getArticlesInfo(page)
             for i in articles:
-                i["folder"]="%05d"%(i["id"],)
-                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json")) as f:
+                i["folder"]=i["id"]
+                with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json"),encoding="UTF-8") as f:
                     mainifest=json.load(f)
                     i["head_image"]=mainifest["head_image"]
                     i["short_descript"]=mainifest["short_descript"]
+                    i["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(i["upload_time"]))
             return(render_template("article/articles.html",articles=articles,page=page,reversed=reversed))
         
-        @self.app.route("/article/<int:id>/<file_name>")
+        @self.app.route("/article/<id>/<file_name>")
         def getArticle(id:int,file_name:str):
-            id=int(id)
-            article_path=self.articleDB.getArticleFolderFromId(id)
-            if(not (article_path and self.articleDB.is_article_visible(id))):
+            folder=id
+            if(not (self.articleDB.is_article_visible(id))):
                 return(self.redirect_404(error="未找到该文章"))
-            return(open(f"{UPLOADEDARTICLEPATH}{article_path}/{file_name}","rb").read())
+            return(open(f"{UPLOADEDARTICLEPATH}{folder}/{file_name}","rb").read())
 
-        @self.app.route("/article/<int:id>")
-        def getArticlePage(id:int):
-            id=int(id)
-            article_path=self.articleDB.getArticleFolderFromId(id)
+        @self.app.route("/article/<id>")
+        def getArticlePage(id:str):
+            folder=id
             article_info=self.articleDB.getArticleFromId(id)
-            with open(os.path.join(UPLOADEDARTICLEPATH,article_path,"main.html"),"r",encoding="GBK") as file:
-                main_content=file.read()
-            if(not (article_path and self.articleDB.is_article_visible(id))):
+            if(not article_info):
                 return(self.redirect_404(error="未找到该文章"))
-            return(render_template("article/render_article.html",article_info=article_info,main_content=main_content,article_path=article_path))
+            with open(os.path.join(UPLOADEDARTICLEPATH,folder,"main.html"),"r",encoding="UTF-8") as file:
+                main_content=file.read()
+            if(not (self.articleDB.is_article_visible(id))):
+                return(self.redirect_404(error="未找到该文章"))
+            article_info["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(article_info["upload_time"]))
+            return(render_template("article/render_article.html",article_info=article_info,main_content=main_content,article_path=folder))
 
 
 

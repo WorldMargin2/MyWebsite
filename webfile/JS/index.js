@@ -49,7 +49,7 @@ $(document).on("scroll", function() {
     container_h=container_h>35?container_h:35;
     container.css("height",container_h+"px");
     if(container_h<=37){
-        container.css("background-color","rgb(3,3,3)");
+        container.css("background-color","rgba(3,3,3,0.5)");
     }else{
         container.css("background-color","transparent")
     }
