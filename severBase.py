@@ -81,7 +81,7 @@ class Sever:
         @self.app.route("/WebFile/LICENSES/<filename>")
         @self.app.route("/LICENSES/<filename>")
         def getLICENSES(filename):
-            return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r").read()))
+            return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r",encoding="UTF-8").read()))
         
         @self.app.route("/WebFile/LICENSES/<filename>/download")
         @self.app.route("/LICENSES/<filename>/download")

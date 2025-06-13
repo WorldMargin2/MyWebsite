@@ -162,5 +162,7 @@ cython_debug/
 
 database/*.db
 webfile/ARTICLES/PREUPLOAD/*/*
+webfile/ARTICLES/PREUPLOAD/*/
+webfile/ARTICLES/PREUPLOAD/*
 webfile/ARTICLES/UPLOADED/*/*
 createArticle/*/
