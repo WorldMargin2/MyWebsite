@@ -304,9 +304,9 @@ class Sever:
             for i in articles:
                 i["folder"]=i["id"]
                 with open(os.path.join(UPLOADEDARTICLEPATH,i["folder"],"mainifest.json"),encoding="UTF-8") as f:
-                    mainifest=json.load(f)
-                    i["head_image"]=mainifest["head_image"]
-                    i["short_descript"]=mainifest["short_descript"]
+                    mainifest:dict=json.load(f)
+                    i["head_image"]=mainifest.get("head_image")
+                    i["short_descript"]=mainifest.get("short_descript",'')
                     i["upload_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(i["upload_time"]))
             return(render_template("article/manage_article.html",articles=articles,page=page,reversed=reversed))
 
