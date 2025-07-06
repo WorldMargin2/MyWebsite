@@ -49,7 +49,7 @@
     .main_content {
         border-radius: 8px;
         padding: 1em 0.5em;
-        max-width: 99vw;
-        left: 0.5vw;
+        width: 95vw;
+        left: 2.5vw;
     }
 }
