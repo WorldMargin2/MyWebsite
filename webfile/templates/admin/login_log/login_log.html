@@ -164,8 +164,14 @@
                         range_right = (new Date(now.getFullYear(), now.getMonth() + 1, 0).setHours(23, 59, 59, 999) - 1)/1000;
                         break;
                     case "custom":
-                        range_left = $('input[name="time_range_left"]').val();
-                        range_right = $('input[name="time_range_right"]').val();
+                        tmp_range_left = new Date($('input[name="time_range_left"]').val()).getTime()/1000;
+                        tmp_range_right = new Date($('input[name="time_range_right"]').val()).getTime()/1000;
+                        if(tmp_range_left<tmp_range_right){
+                            range_left=tmp_range_left;
+                            range_right=tmp_range_right;
+                        }else{
+                            alert("时间范围错误");
+                        }
                         break;
                 }
                 $.ajax({
