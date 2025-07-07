@@ -1,0 +1,7 @@
+{% for log in logs %}
+<tr>
+    <td>{{ log["admin_name"] }}</td>
+    <td class="login_time">{{ log["login_time"] }}</td>
+    <td>{{ log["ip_address"] }}</td>
+</tr>
+{% endfor %}

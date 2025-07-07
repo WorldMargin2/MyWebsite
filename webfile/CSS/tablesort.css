@@ -1,0 +1,32 @@
+
+@font-face {
+    font-family: 'iconfont';
+    src: url('../ICON/iconfont.woff2?t=1701668448540') format('woff2'),
+         url('../ICON/iconfont.woff?t=1701668448540') format('woff'),
+         url('../ICON/iconfont.ttf?t=1701668448540') format('truetype');
+}
+
+.tablesorter-headerDesc{
+    border-bottom: aqua solid 1px;
+}
+.tablesorter-headerAsc{
+    border-top: aqua solid 1px;
+} 
+
+.tablesorter-headerDesc::after,
+.tablesorter-headerAsc::after{    
+    font-family: "iconfont" !important;
+    position: absolute;
+    top: 0;
+    font-size: 2em;
+    font-weight: 100;
+    padding-left: 1em;
+}
+
+.tablesorter-headerAsc::after{
+    content: "\e771";
+}
+
+.tablesorter-headerDesc::after{
+    content: "\e772";
+}

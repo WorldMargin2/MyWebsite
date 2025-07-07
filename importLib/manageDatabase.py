@@ -329,7 +329,7 @@ class AdminDB(Database):
             cs.execute("CREATE TABLE CONFUSE (confuse_key TEXT)")
             
             cs.execute("DROP TABLE if exists LOGIN_LOG")
-            cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time TEXT,IP TEXT)")
+            cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT)")
             
             cs.execute("DROP TABLE if exists PASSWORD_ERROR_LOG")
             cs.execute("CREATE TABLE PASSWORD_ERROR_LOG (IP TEXT PRIMARY KEY,TIMES INT,LAST_TIME TEXT)")
@@ -342,7 +342,50 @@ class AdminDB(Database):
             cs.close()
             db.commit()
 
+    def update_db(self):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("DROP TABLE if exists login_log")
+            cs.execute("create table login_log(admin_name text,time integer,ip text)")
+            cs.close()
 
+    def get_login_logs_length(self,time_range=(0,0))->int:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            if(time_range[0] != 0):
+                cs.execute(
+                    "SELECT count(*) FROM LOGIN_LOG WHERE time >= ? AND time <= ?",
+                    time_range
+                )
+            else:
+                cs.execute("SELECT count(*) FROM LOGIN_LOG")
+            res=cs.fetchone()[0]
+            cs.close()
+            return(res)
+    
+    def get_login_logs_pages(self,time_range=(0,0),numPerpage=50)->int:
+        total=self.get_login_logs_length(time_range)
+        return (total//numPerpage)+(total%numPerpage>0)
+
+    def get_login_logs(self,page=1,time_range=(0,0),numPerPage=50)->list[dict]:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            if(time_range[0] !=  0):
+                cs.execute(
+                    "SELECT admin_name,time,IP FROM LOGIN_LOG WHERE time >= ? AND time <= ? ORDER BY time DESC LIMIT ? OFFSET ?",
+                    (time_range[0],time_range[1],numPerPage,(page-1)*numPerPage)
+                )
+            else:
+                cs.execute(
+                    "SELECT admin_name,time,IP FROM LOGIN_LOG ORDER BY time DESC LIMIT ? OFFSET ?",
+                    (numPerPage,(page-1)*numPerPage)
+                )
+            temp=cs.fetchall()
+            cs.close()
+            res=[]
+            for i in temp:
+                res.append(dict(zip(("admin_name","login_time","ip_address"),i)))
+            return(res)
 
     def get_name_password(self,cookie:dict):
         with dbconnect(self.db) as db:
@@ -360,7 +403,6 @@ class AdminDB(Database):
             for i in range(10)
         )
         cs.executemany("INSERT INTO CONFUSE VALUES (?)",confuse_strs)
-        cs.close()
         return confuse_strs
 
     def summon_confuse(self):
@@ -476,6 +518,8 @@ class AdminDB(Database):
                 self.__set_config("password_key",password_key,cs)
                 self.__set_config("salt",new_salt,cs)
                 confuse_strs=self.__summon_confuse(cs)
+                login_time=time.time()
+                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip) VALUES(?,?,?)",(name,login_time,ip))
                 cs.close()
                 db.commit()
                 res={

@@ -1,0 +1,23 @@
+{
+  "id": "4357535",
+  "name": "管理系统",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "6129094",
+      "name": "57表头-正序",
+      "font_class": "biaotou-zhengxu",
+      "unicode": "e771",
+      "unicode_decimal": 59249
+    },
+    {
+      "icon_id": "6129095",
+      "name": "58表头-倒序",
+      "font_class": "biaotou-daoxu",
+      "unicode": "e772",
+      "unicode_decimal": 59250
+    }
+  ]
+}

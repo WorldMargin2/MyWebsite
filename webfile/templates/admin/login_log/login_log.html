@@ -1,0 +1,264 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/CSS/tablesort.css">
+    <link rel="stylesheet" href="/CSS/admin/login_log.css">
+    <link rel="stylesheet" href="/CSS/--scroll-bar.css">
+    <script src="/JS/jquery.js"></script>
+    <script src="/JS/pinyin.js"></script>
+    <script src="/JS/tablesort.js"></script>
+    <script src="/JS/clipboard.js"></script>
+    <title>登录日志</title>
+</head>
+<body>
+    <div class="container">
+        <h1>登录日志</h1>
+        <div class="filter">
+            <select name="time_filter" class="filterSelect">
+                <option value="all">全部</option>
+                <option value="today">今天</option>
+                <option value="this_week">本周</option>
+                <option value="this_month">本月</option>
+                <option value="custom">自定义</option>
+            </select>
+            <div class="custom_range">
+                <div>
+                    <input type="datetime-local" name="time_range_left" class="filterInput" placeholder="开始时间">
+                </div>
+                <div>
+                    <input type="datetime-local" name="time_range_right" class="filterInput" placeholder="结束时间">
+                </div>
+            </div>
+            
+            <input type="text" id="name_filter" class="filterInput" placeholder="筛选用户名">
+            <button id="commit_filter">筛选</button>
+            <button id="copy_button">复制</button>
+            <div></div>
+            
+        </div>
+        <div class="pages">
+            <button class="last_page">上一页</button>
+            <span>
+                <span>当前页数: </span>
+                <span class="pages_container">                    
+                    <input type="number" min="1" id="current_page" value="1" max="999999">
+                    <span> / </span>
+                    <span id="total_pages">1</span>
+                </span>
+            </span>
+            <button class="next_page">下一页</button>
+        </div>
+        <table class="tablesorter">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>用户名</th>
+                    <th>登录时间</th> <!--example: 2025-07-07 16:45:36-->
+                    <th>IP地址</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <script id="init">
+        let range_left=range_right=0;
+        let pages=1;
+        let data_buffer = new Map();
+
+        function fillData(data){
+            $('tbody').html('');
+                data.forEach((log,index) => {
+                $('tbody').append(`
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${log.admin_name}</td>
+                        <td class="login_time">${log.login_time}</td>
+                        <td>${log.ip_address}</td>
+                    </tr>
+                `);
+            });
+        }
+        function requestPageData(page) {
+            $.ajax({
+                url: '/admin/login_log/get_page_json',
+                type: 'POST',
+                data: {
+                    page: page,
+                    time_range_left: parseInt(range_left),
+                    time_range_right: parseInt(range_right),
+                },
+                success: (response) =>{
+                    data_buffer[page]=response;
+                    fillData(response);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            $.ajax({
+                url: '/admin/login_log/get_pages',
+                type: 'POST',
+                data: {
+                    time_range_left: 0,
+                    time_range_right: 0
+                },
+                success: function(data) {
+                    pages = data.pages;
+                    $("#total_pages").text(pages);
+                    $("#current_page").css("width",$("#total_pages").width()*2);
+                    requestPageData(1);
+                }
+            });
+        });
+    </script>
+    <script id="filter-script">
+        $(document).ready(function() {
+            $("#name_filter").on("input", function() {
+                let name_filter = $(this).val();
+                if (name_filter.length > 0) {
+                    
+                    $(".tablesorter tbody tr").each(function() {
+                        let row = $(this);
+                        let username = row.find("td:first").text();
+                        if (username.includes(name_filter)) {
+                            row.show();
+                        } else {
+                            row.hide();
+                        }
+                    });
+                } else {
+                    $(".tablesorter tbody tr").show();
+                }
+            });
+
+            $('select[name="time_filter"]').change(function() {
+                let time_filter = $(this).val();
+                if (time_filter === "custom") {
+                    $('.custom_range').css("visibility", "visible");
+                } else {
+                    $('.custom_range').css("visibility", "hidden");
+                }
+            });
+
+            $('#commit_filter').click(function() {
+                let time_filter = $('select[name="time_filter"]').val();
+
+                switch(time_filter) {
+                    case "all":
+                        range_left=0;
+                        range_right=0;
+                        break;
+                    case "today":
+                        range_left=(new Date().setHours(0,0,0,0))/1000;
+                        range_right=(new Date().setHours(23,59,59,999))/1000;
+                        break;
+                    case "this_week":
+                        range_left=(new Date().setHours(0,0,0,0)-new Date().getDay()*24*60*60)/1000;
+                        range_right=(new Date().setHours(23,59,59,999)+((6-new Date().getDay())*24*60*60))/1000;
+                        break;
+                    case "this_month":
+                        let now = new Date();
+                        range_left = (new Date(now.getFullYear(), now.getMonth(), 1).setHours(0, 0, 0, 0))/1000;
+                        range_right = (new Date(now.getFullYear(), now.getMonth() + 1, 0).setHours(23, 59, 59, 999) - 1)/1000;
+                        break;
+                    case "custom":
+                        range_left = $('input[name="time_range_left"]').val();
+                        range_right = $('input[name="time_range_right"]').val();
+                        break;
+                }
+                $.ajax({
+                    url: '/admin/login_log/get_pages',
+                    type: 'POST',
+                    data: {
+                        time_range_left: parseInt(range_left),
+                        time_range_right: parseInt(range_right),
+                        page:1
+                    },
+                    success: function(data) {
+                        pages = data.pages;
+                        $("#total_pages").text(pages);
+                        $("#current_page").css("width",$("#total_pages").width()*2);
+                    }
+                });
+                requestPageData(1);
+            });
+            $('.last_page').click(function() {
+                let currentPage = parseInt($('#current_page').val());
+                if(currentPage>1){
+                    currentPage--;
+                    if(currentPage in data_buffer){
+                        fillData(data_buffer[currentPage]);
+                    }else{
+                        console.log(currentPage);
+                        requestPageData(currentPage);
+                    }
+                    $('#current_page').val(currentPage);
+                }
+                $("tbody").scrollTop(0);
+            });
+            $("#current_page").on("input",function(){
+                let value=parseInt($(this).val());
+                if(value>0&&value<=pages){
+                    if(value in data_buffer){
+                        fillData(data_buffer[value]);
+                    }else{
+                        requestPageData(value);
+                    }
+                }
+                $("tbody").scrollTop(0);
+            });
+            $('.next_page').click(function() {
+                let currentPage = parseInt($('#current_page').val());
+                if(currentPage<pages){
+                    currentPage++;
+                    if(currentPage in data_buffer){
+                        fillData(data_buffer[currentPage]);
+                    }else{
+                        console.log(currentPage);
+                        requestPageData(currentPage);
+                    }
+                    $('#current_page').val(currentPage);
+                }
+                $("tbody").scrollTop(0);
+            });
+        });
+    </script>
+
+    <script id="clipboard-script">
+        let clipboard = new ClipboardJS('#copy_button', {
+            text: function(trigger) {
+                let rows = document.querySelectorAll('.tablesorter tbody tr');
+                let text = '';
+                rows.forEach(row => {
+                    let cells = row.querySelectorAll('td');
+                    text += Array.from(cells).map(cell => cell.textContent).join('\t') + '\n';
+                });
+                return text.trim();
+            }
+        });
+    </script>
+
+    <script id="sort-script">
+        
+    $.tablesorter.addParser({
+        id:"DPG",
+        is:(s)=>{return(false);},
+        format:function(s){
+            return(window.Pinyin.t(s));
+        }
+    });
+
+    $(".tablesorter").tablesorter(
+        {
+            headers:{
+                1:{sorter:"DPG"},
+                2:{sorter:"DPG"}
+            }
+        }
+    );
+    </script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@ import json
 from .handlers import restart
 
 class Version:
-    ver="1.5"
+    ver="1.3"
     def check_version(self):
         ver:tuple
         with dbconnect(ADMINDB) as db:
@@ -20,7 +20,7 @@ class Version:
         
         if((not ver)or(ver[0]!=self.ver)):
             self.update()
-            restart()
+            # restart()
 
 
 
@@ -32,7 +32,7 @@ class Version:
         self.check_version()
 
     def update(self):
-        self.articledb.update_db()
+        self.admindb.update_db()
 
 
         

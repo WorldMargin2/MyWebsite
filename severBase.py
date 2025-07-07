@@ -53,38 +53,38 @@ class Sever:
         def getfavicon():
             return(readFile(f"{ICONPATH}WorldMargin.ico"))
 
-        @self.app.route("/WebFile/JS/<filename>")
-        @self.app.route("/JS/<filename>")
+        @self.app.route("/WebFile/JS/<path:filename>")
+        @self.app.route("/JS/<path:filename>")
         def getJS(filename):
             return(readFile(f"{JSPATH}{filename}"))
         
-        @self.app.route("/WebFile/CSS/<filename>")
-        @self.app.route("/CSS/<filename>")
+        @self.app.route("/WebFile/CSS/<path:filename>")
+        @self.app.route("/CSS/<path:filename>")
         def getCSS(filename):
             return(readFile(f"{CSSPATH}{filename}"))
         
-        @self.app.route("/WebFile/IMAGE/<filename>")
-        @self.app.route("/IMAGE/<filename>")
+        @self.app.route("/WebFile/IMAGE/<path:filename>")
+        @self.app.route("/IMAGE/<path:filename>")
         def getIMAGE(filename):
             return(readFile(f"{IMAGEPATH}{filename}"))
         
-        @self.app.route("/WebFile/ICON/<filename>")
-        @self.app.route("/ICON/<filename>")
+        @self.app.route("/WebFile/ICON/<path:filename>")
+        @self.app.route("/ICON/<path:filename>")
         def getICON(filename):
             return(readFile(f"{ICONPATH}{filename}"))
         
-        @self.app.route("/WebFile/HTML/<filename>")
-        @self.app.route("/HTML/<filename>")
+        @self.app.route("/WebFile/HTML/<path:filename>")
+        @self.app.route("/HTML/<path:filename>")
         def getHTML(filename):
             return(readFile(f"{HTMLPATH}{filename}"))
         
-        @self.app.route("/WebFile/LICENSES/<filename>")
-        @self.app.route("/LICENSES/<filename>")
+        @self.app.route("/WebFile/LICENSES/<path:filename>")
+        @self.app.route("/LICENSES/<path:filename>")
         def getLICENSES(filename):
             return(render_template("readLicense.html",license_text=open(f"{LICENSESPATH}{filename}","r",encoding="UTF-8").read()))
         
-        @self.app.route("/WebFile/LICENSES/<filename>/download")
-        @self.app.route("/LICENSES/<filename>/download")
+        @self.app.route("/WebFile/LICENSES/<path:filename>/download")
+        @self.app.route("/LICENSES/<path:filename>/download")
         def downloadLICENSES(filename):
             return(open(f"{LICENSESPATH}{filename}","r").read())        
         
@@ -196,6 +196,51 @@ class Sever:
                 else:
                     errors.append("用户名或密码错误")
             return render_template("admin/login.html", form=form, errors=errors)
+        
+        @self.app.route("/admin/login_log")
+        @self.checklogin
+        def admin_login_log():
+            logs = self.adminDB.get_login_logs()
+            return render_template("admin/login_log/login_log.html", logs=logs)
+        
+        @self.csrf.exempt
+        @self.app.route("/admin/login_log/get_pages",methods=["POST"])
+        @self.checklogin
+        def get_admin_login_pages():
+            data=request.form
+            time_range_left=data.get("time_range_left")
+            time_range_right=data.get("time_range_right")
+            time_range=(int(time_range_left),int(time_range_right))
+            total=self.adminDB.get_login_logs_pages(time_range)
+            return(jsonify({"pages":total}))
+
+        @self.csrf.exempt
+        @self.app.route("/admin/login_log/get_length",methods=["POST"])
+        @self.checklogin
+        def get_admin_login_length():
+            args=request.args
+            time_range_left=args.get("time_range_left")
+            time_range_right=args.get("time_range_right")
+            time_range=(time_range_left,time_range_right)
+            return(jsonify(self.adminDB.get_login_logs_length(time_range)))
+        
+        @self.csrf.exempt
+        @self.app.route("/admin/login_log/get_page_json",methods=["POST"])
+        @self.checklogin
+        def get_admin_login_log_page_json():
+            data=request.form
+            page=int(data.get("page",1))
+            time_range_left=data.get("time_range_left")
+            time_range_right=data.get("time_range_right")
+            time_range=(int(time_range_left),int(time_range_right))
+            logs=self.adminDB.get_login_logs(page,time_range)
+            for log in logs:
+                log["login_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(log["login_time"]))
+            return(jsonify(logs))
+        
+        
+
+
 
         @self.app.route("/admin/edit_account",methods=["GET","POST"])
         @self.checklogin
