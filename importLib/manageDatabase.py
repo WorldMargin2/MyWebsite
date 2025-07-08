@@ -483,7 +483,9 @@ class AdminDB(Database):
                 self.__set_config("salt",new_salt,cs)
                 confuse_strs=self.__summon_confuse(cs)
                 login_time=time.time()
-                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip) VALUES(?,?,?)",(name,login_time,ip))
+                searcher=Ip2Region(IP2REGIONDB)
+                ip_region=searcher.btreeSearch(ip).get("region",b"Unknown").decode("utf-8")
+                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip,IP_REGION) VALUES(?,?,?,?)",(name,login_time,ip,ip_region))
                 cs.close()
                 db.commit()
                 res={
