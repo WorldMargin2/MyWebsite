@@ -308,7 +308,6 @@ class Sever:
         return(redirect(url_for("notFound",error=error)))
 
     def handle_event(self):
-        @self.app.route("/admin/login",methods=["GET","POST"])
         def checklogin_decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
