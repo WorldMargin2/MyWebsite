@@ -1,0 +1,145 @@
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传数据库</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: #fff;
+            padding: 32px 28px 28px 28px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            text-align: center;
+            min-width: 320px;
+            max-width: 380px;
+            width: 100%;
+            transition: box-shadow 0.3s;
+        }
+        .container:hover {
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.22);
+        }
+        h1 {
+            color: #2d3a4b;
+            margin-bottom: 18px;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+        }
+        form {
+            margin-top: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #4a5a6a;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .custom-file-input {
+            display: none;
+        }
+        .file-label {
+            display: inline-block;
+            padding: 10px 22px;
+            background: #f0f4fa;
+            color: #4a5a6a;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #d1dbe6;
+            margin-bottom: 18px;
+            transition: background 0.2s, border 0.2s;
+        }
+        .file-label:hover {
+            background: #e6eef8;
+            border-color: #b6c6d8;
+        }
+        #file-name {
+            display: block;
+            margin: 8px 0 18px 0;
+            color: #6b7a8f;
+            font-size: 0.95rem;
+        }
+        button {
+            background: linear-gradient(90deg, #5cb85c 0%, #4cae4c 100%);
+            color: white;
+            padding: 12px 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.08rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(92,184,92,0.08);
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background: linear-gradient(90deg, #4cae4c 0%, #5cb85c 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .message {
+            margin-top: 22px;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .error {
+            color: #d9534f;
+            background: #fbeaea;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            color: #3c763d;
+            background: #eafaf1;
+            border: 1px solid #b2dfdb;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 18px 6px 16px 6px;
+                min-width: unset;
+                max-width: 98vw;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>上传IP2Region数据库</h1>
+        <form action="/admin/ip2region/upload" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="file" class="file-label">选择文件</label>
+            <input type="file" id="file" name="file" accept=".db" class="custom-file-input" onchange="showFileName()">
+            <span id="file-name"></span>
+            <button type="submit">上传</button>
+        </form>
+        {% if error %}
+            <div class="message error">{{ error }}</div>
+        {% endif %}
+        {% if message %}
+            <div class="message success">{{ message }}</div>
+        {% endif %}
+    </div>
+    <script>
+        // 文件选择美化
+        document.querySelector('.file-label').onclick = function() {
+            document.getElementById('file').click();
+        };
+        function showFileName() {
+            var input = document.getElementById('file');
+            var fileName = input.files.length > 0 ? input.files[0].name : '';
+            document.getElementById('file-name').textContent = fileName;
+        }
+    </script>
+</body>
+</html>

@@ -7,6 +7,7 @@ from flask import Request
 from werkzeug.security import generate_password_hash,check_password_hash
 from .const_path import *
 from .handlers import get_hash_code
+from .ip2Region import Ip2Region
 
 
 
@@ -32,53 +33,7 @@ class ArticleDB(Database):
         super().__init__()
 
     def update_db(self):
-        """
-        get_hash_code(t:time.time())-> str:
-        将原先的int型id换成时间戳的sha256值
-        创建articledb.db.update
-        该文件用于更新数据库并且迁移数据
-        原有的文章:
-            将"%Y-%m-%d %H:%M:%S"格式的时间转换为时间戳
-            将id转换为sha256的hash值
-
-        """
-        new_db_path = ARTICLEDB + ".update"
-        with dbconnect(new_db_path) as new_db:
-            cs=new_db.cursor()
-            cs.execute("DROP TABLE if exists ARTICLE")
-            cs.execute(
-                "CREATE TABLE ARTICLE ("
-                    "id TEXT PRIMARY KEY,"
-                    "title TEXT,"
-                    "upload_time INTEGER,"
-                    "visible INTEGER,"
-                    "show_weight INT,"
-                    "topest INTEGER"
-                ")"
-            )
-            with dbconnect(self.db) as db:
-                old_cs=db.cursor()
-                old_cs.execute("SELECT * FROM ARTICLE")
-                for row in old_cs.fetchall():
-                    new_id = get_hash_code(row[0])
-                    upload_time = int(time.mktime(time.strptime(row[2], "%Y-%m-%d %H:%M:%S")))
-                    cs.execute(
-                        "INSERT INTO ARTICLE VALUES (?,?,?,?,?,?)",
-                        (new_id, row[1], upload_time, row[3], row[4], row[5])
-                    )
-                    os.rename(f"{UPLOADEDARTICLEPATH}/{'%05d'%(row[0],)}", f"{UPLOADEDARTICLEPATH}/{new_id}")
-                old_cs.close()
-            cs.close()
-            new_db.commit()
-            
-        import gc
-        from sqlite3 import Connection
-        gc.collect()
-        Connection.close(db)
-        Connection.close(new_db)
-        if os.path.exists(self.db) and os.path.exists(self.db + ".update"):
-            os.remove(self.db)
-            os.rename(self.db + ".update", self.db)
+        pass
     
     def init_db(self):
         with dbconnect(self.db) as db:
@@ -123,8 +78,6 @@ class ArticleDB(Database):
             res= cs.fetchone() is not None
             cs.close()
             return res
-
-
     
     def publishArticle(self,article):
         with dbconnect(self.db) as db:
@@ -142,7 +95,6 @@ class ArticleDB(Database):
             )
             cs.close()
             db.commit()
-
 
     def editArticle(self,id:str,article:dict):
         with dbconnect(self.db) as db:
@@ -329,7 +281,7 @@ class AdminDB(Database):
             cs.execute("CREATE TABLE CONFUSE (confuse_key TEXT)")
             
             cs.execute("DROP TABLE if exists LOGIN_LOG")
-            cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT)")
+            cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
             
             cs.execute("DROP TABLE if exists PASSWORD_ERROR_LOG")
             cs.execute("CREATE TABLE PASSWORD_ERROR_LOG (IP TEXT PRIMARY KEY,TIMES INT,LAST_TIME TEXT)")
@@ -343,11 +295,23 @@ class AdminDB(Database):
             db.commit()
 
     def update_db(self):
-        with dbconnect(self.db) as db:
-            cs=db.cursor()
-            cs.execute("DROP TABLE if exists login_log")
-            cs.execute("create table login_log(admin_name text,time integer,ip text)")
-            cs.close()
+        if(os.path.exists(IP2REGIONDB)):
+            with dbconnect(self.db) as db:
+                cs=db.cursor()
+                cs.execute("SELECT * FROM LOGIN_LOG")
+                tmp=cs.fetchall()
+                cs.execute("DROP TABLE if exists LOGIN_LOG")
+                cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
+                searcher=Ip2Region(IP2REGIONDB)
+                for i in tmp:
+                    cs.execute(
+                        "INSERT INTO LOGIN_LOG VALUES (?,?,?,?)",
+                        (i[0],i[1],i[2],searcher.btreeSearch(i[2]).get("region",b"Unknown").decode("utf-8"))
+                    )
+                cs.close()
+                db.commit()
+            return True
+        return False
 
     def get_login_logs_length(self,time_range=(0,0))->int:
         with dbconnect(self.db) as db:
@@ -372,19 +336,19 @@ class AdminDB(Database):
             cs=db.cursor()
             if(time_range[0] !=  0):
                 cs.execute(
-                    "SELECT admin_name,time,IP FROM LOGIN_LOG WHERE time >= ? AND time <= ? ORDER BY time DESC LIMIT ? OFFSET ?",
+                    "SELECT admin_name,time,IP,IP_REGION FROM LOGIN_LOG WHERE time >= ? AND time <= ? ORDER BY time DESC LIMIT ? OFFSET ?",
                     (time_range[0],time_range[1],numPerPage,(page-1)*numPerPage)
                 )
             else:
                 cs.execute(
-                    "SELECT admin_name,time,IP FROM LOGIN_LOG ORDER BY time DESC LIMIT ? OFFSET ?",
+                    "SELECT admin_name,time,IP,IP_REGION FROM LOGIN_LOG ORDER BY time DESC LIMIT ? OFFSET ?",
                     (numPerPage,(page-1)*numPerPage)
                 )
             temp=cs.fetchall()
             cs.close()
             res=[]
             for i in temp:
-                res.append(dict(zip(("admin_name","login_time","ip_address"),i)))
+                res.append(dict(zip(("admin_name","login_time","ip_address","region"),i)))
             return(res)
 
     def get_name_password(self,cookie:dict):

@@ -199,6 +199,7 @@ class Sever:
         
         @self.app.route("/admin/login_log")
         @self.checklogin
+        @self.ip2regin_database_validater
         def admin_login_log():
             logs = self.adminDB.get_login_logs()
             return render_template("admin/login_log/login_log.html", logs=logs)
@@ -227,6 +228,7 @@ class Sever:
         @self.csrf.exempt
         @self.app.route("/admin/login_log/get_page_json",methods=["POST"])
         @self.checklogin
+        @self.ip2regin_database_validater
         def get_admin_login_log_page_json():
             data=request.form
             page=int(data.get("page",1))
@@ -238,10 +240,26 @@ class Sever:
                 log["login_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(log["login_time"]))
             return(jsonify(logs))
         
+        @self.app.route("/admin/ip2region/upload",methods=["GET","POST"])
+        @self.checklogin
+        def ip2region_upload():
+            if(request.method=="GET"):
+                return(render_template("admin/ip2region_upload.html",error=get_flashed_messages()))
+            else:
+                if("file" in request.files):
+                    ip2region_file=request.files["file"]
+                    if(ip2region_file.filename.endswith(".db")):
+                        ip2region_file.save(IP2REGIONDB)
+                        return(redirect("/admin/ip2region/upload"))
+                    else:
+                        return(self.redirect_404(error="文件格式错误"))
         
-
-
-
+        @self.app.route("/admin/ip2region/download")
+        @self.checklogin
+        @self.ip2regin_database_validater
+        def ip2region_download():
+            return(send_file(os.path.join(DATABASEPATH,"ip2region.db"),as_attachment=True))
+                
         @self.app.route("/admin/edit_account",methods=["GET","POST"])
         @self.checklogin
         def edit_account():
@@ -290,6 +308,7 @@ class Sever:
         return(redirect(url_for("notFound",error=error)))
 
     def handle_event(self):
+        @self.app.route("/admin/login",methods=["GET","POST"])
         def checklogin_decorator(f):
             @wraps(f)
             def decorated_function(*args, **kwargs):
@@ -299,6 +318,16 @@ class Sever:
                     return(redirect(url_for("admin_login",error="未登录")))
             return(decorated_function)
         self.checklogin=checklogin_decorator
+
+        def ip2regin_database_validater(f):
+            @wraps(f)
+            def decorated_function(*args, **kwargs):
+                if(not os.path.exists(IP2REGIONDB)):
+                    flash("IP2Region数据库未上传或已损坏，请上传正确的数据库文件。", "error")
+                    return(redirect("/admin/ip2region/upload"))
+                return(f(*args, **kwargs))
+            return(decorated_function)
+        self.ip2regin_database_validater=ip2regin_database_validater
 
     def article_url(self):
         # admin required
