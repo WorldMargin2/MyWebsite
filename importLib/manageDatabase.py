@@ -306,7 +306,7 @@ class AdminDB(Database):
                 for i in tmp:
                     cs.execute(
                         "INSERT INTO LOGIN_LOG VALUES (?,?,?,?)",
-                        (i[0],i[1],i[2],searcher.btreeSearch(i[2]).get("region",b"Unknown").decode("utf-8"))
+                        (i[0],i[1],i[2],searcher.memorySearch(i[2]).get("region",b"Unknown").decode("utf-8"))
                     )
                 cs.close()
                 db.commit()
@@ -484,7 +484,8 @@ class AdminDB(Database):
                 confuse_strs=self.__summon_confuse(cs)
                 login_time=time.time()
                 searcher=Ip2Region(IP2REGIONDB)
-                ip_region=searcher.btreeSearch(ip).get("region",b"Unknown").decode("utf-8")
+                ip_region=searcher.memorySearch(ip).get("region",b"Unknown").decode("utf-8")
+                searcher.close()
                 cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip,IP_REGION) VALUES(?,?,?,?)",(name,login_time,ip,ip_region))
                 cs.close()
                 db.commit()
