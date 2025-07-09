@@ -498,7 +498,7 @@ class AdminDB(Database):
                 self.__set_config("salt",new_salt,cs)
                 confuse_strs=self.__summon_confuse(cs)
                 login_time=time.time()
-                self._insert_login_log(name,login_time,ip)
+                self._insert_login_log(cs,name,login_time,ip)
                 cs.close()
                 db.commit()
                 res={
