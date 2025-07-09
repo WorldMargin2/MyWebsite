@@ -263,7 +263,7 @@ class ArticleDB(Database):
 class AdminDB(Database):
     db=ADMINDB
     max_salt_count=10
-    max_log_count=50
+    max_log_count=99999
     max_pass_error_count=5
 
     def __init__(self):
@@ -281,7 +281,7 @@ class AdminDB(Database):
             cs.execute("CREATE TABLE CONFUSE (confuse_key TEXT)")
             
             cs.execute("DROP TABLE if exists LOGIN_LOG")
-            cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
+            cs.execute("CREATE TABLE LOGIN_LOG (id PRIMARY KEY AUTOINCREMENT,admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
             
             cs.execute("DROP TABLE if exists PASSWORD_ERROR_LOG")
             cs.execute("CREATE TABLE PASSWORD_ERROR_LOG (IP TEXT PRIMARY KEY,TIMES INT,LAST_TIME TEXT)")
@@ -295,23 +295,36 @@ class AdminDB(Database):
             db.commit()
 
     def update_db(self):
-        if(os.path.exists(IP2REGIONDB)):
-            with dbconnect(self.db) as db:
-                cs=db.cursor()
-                cs.execute("SELECT * FROM LOGIN_LOG")
-                tmp=cs.fetchall()
-                cs.execute("DROP TABLE if exists LOGIN_LOG")
-                cs.execute("CREATE TABLE LOGIN_LOG (admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
-                searcher=Ip2Region(IP2REGIONDB)
-                for i in tmp:
-                    cs.execute(
-                        "INSERT INTO LOGIN_LOG VALUES (?,?,?,?)",
-                        (i[0],i[1],i[2],searcher.memorySearch(i[2]).get("region",b"Unknown").decode("utf-8"))
-                    )
-                cs.close()
-                db.commit()
-            return True
-        return False
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("select admin_name,time,IP,IP_REGION from LOGIN_LOG")
+            tmp= cs.fetchall()
+            cs.execute("DROP TABLE if exists LOGIN_LOG")
+            cs.execute("CREATE TABLE LOGIN_LOG (id INTEGER PRIMARY KEY AUTOINCREMENT,admin_name TEXT, time INTEGER,IP TEXT,IP_REGION TEXT)")
+            for i in tmp:
+                cs.execute("INSERT INTO LOGIN_LOG VALUES (?,?,?,?,?)",i)
+            db.commit()
+            cs.close()
+
+    # ==========================================LOGIN LOG========================================
+
+
+    def insert_login_log(self,admin_name:str,login_time:int,ip:str):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            self._insert_login_log(cs,admin_name,login_time,ip)
+            cs.close()
+            db.commit()
+
+    def _insert_login_log(self,cs:Cursor,admin_name:str,login_time:int,ip:str):
+        searcher=Ip2Region(IP2REGIONDB)
+        ip_region=searcher.memorySearch(ip).get("region",b"Unknown").decode("utf-8")
+        searcher.close()
+        cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip,IP_REGION) VALUES(?,?,?,?)",(admin_name,login_time,ip,ip_region))
+        cs.execute("select count(*) from LOGIN_LOG")
+        log_count=cs.fetchone()[0]
+        if(log_count>self.max_log_count):
+            cs.execute("delete from LOGIN_LOG where id in (select id from LOGIN_LOG order by time limit ?)",(log_count-self.max_log_count,))
 
     def get_login_logs_length(self,time_range=(0,0))->int:
         with dbconnect(self.db) as db:
@@ -336,20 +349,22 @@ class AdminDB(Database):
             cs=db.cursor()
             if(time_range[0] !=  0):
                 cs.execute(
-                    "SELECT admin_name,time,IP,IP_REGION FROM LOGIN_LOG WHERE time >= ? AND time <= ? ORDER BY time DESC LIMIT ? OFFSET ?",
+                    "SELECT id,admin_name,time,IP,IP_REGION FROM LOGIN_LOG WHERE time >= ? AND time <= ? ORDER BY time DESC LIMIT ? OFFSET ?",
                     (time_range[0],time_range[1],numPerPage,(page-1)*numPerPage)
                 )
             else:
                 cs.execute(
-                    "SELECT admin_name,time,IP,IP_REGION FROM LOGIN_LOG ORDER BY time DESC LIMIT ? OFFSET ?",
+                    "SELECT id,admin_name,time,IP,IP_REGION FROM LOGIN_LOG ORDER BY time DESC LIMIT ? OFFSET ?",
                     (numPerPage,(page-1)*numPerPage)
                 )
             temp=cs.fetchall()
             cs.close()
             res=[]
             for i in temp:
-                res.append(dict(zip(("admin_name","login_time","ip_address","region"),i)))
+                res.append(dict(zip(("id","admin_name","login_time","ip_address","region"),i)))
             return(res)
+        
+    # ==========================================PASSWORD========================================
 
     def get_name_password(self,cookie:dict):
         with dbconnect(self.db) as db:
@@ -483,10 +498,7 @@ class AdminDB(Database):
                 self.__set_config("salt",new_salt,cs)
                 confuse_strs=self.__summon_confuse(cs)
                 login_time=time.time()
-                searcher=Ip2Region(IP2REGIONDB)
-                ip_region=searcher.memorySearch(ip).get("region",b"Unknown").decode("utf-8")
-                searcher.close()
-                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,ip,IP_REGION) VALUES(?,?,?,?)",(name,login_time,ip,ip_region))
+                self._insert_login_log(name,login_time,ip)
                 cs.close()
                 db.commit()
                 res={

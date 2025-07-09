@@ -72,7 +72,7 @@
             $('tbody').html('');
                 data.forEach((log,index) => {
                 $('tbody').append(`
-                    <tr>
+                    <tr log_id="${log.id}">
                         <td>${index+1}</td>
                         <td>${log.admin_name}</td>
                         <td class="login_time">${log.login_time}</td>
@@ -157,8 +157,8 @@
                         range_right=(new Date().setHours(23,59,59,999))/1000;
                         break;
                     case "this_week":
-                        range_left=(new Date().setHours(0,0,0,0)-new Date().getDay()*24*60*60)/1000;
-                        range_right=(new Date().setHours(23,59,59,999)+((6-new Date().getDay())*24*60*60))/1000;
+                        range_left=(new Date().setHours(0,0,0,0)-new Date().getDay()*24*60*60*1000)/1000;
+                        range_right=(new Date().setHours(23,59,59,999)+((6-new Date().getDay())*24*60*60*1000))/1000;
                         break;
                     case "this_month":
                         let now = new Date();

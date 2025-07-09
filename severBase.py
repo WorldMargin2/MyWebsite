@@ -160,7 +160,15 @@ class Sever:
                     log=file.readlines()
                     return("<br/>".join(log))
 
-    def admin_url(self):    
+    def admin_url(self):
+
+        @self.app.route("/update")
+        @self.checklogin
+        def triggle_update():
+            self.version.update()
+            return(redirect("/admin"))
+
+
         @self.app.route("/admin/logout", methods=["POST","GET"])
         @self.checklogin
         def admin_logout():
@@ -197,6 +205,8 @@ class Sever:
                     errors.append("用户名或密码错误")
             return render_template("admin/login.html", form=form, errors=errors)
         
+
+        # ============================LOGIN LOG========================================================================================
         @self.app.route("/admin/login_log")
         @self.checklogin
         @self.ip2regin_database_validater
@@ -240,6 +250,8 @@ class Sever:
                 log["login_time"]=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(log["login_time"]))
             return(jsonify(logs))
         
+        # ============================IP2REGION========================================================================================
+        
         @self.app.route("/admin/ip2region/upload",methods=["GET","POST"])
         @self.checklogin
         def ip2region_upload():
@@ -259,7 +271,10 @@ class Sever:
         @self.ip2regin_database_validater
         def ip2region_download():
             return(send_file(os.path.join(DATABASEPATH,"ip2region.db"),as_attachment=True))
-                
+        
+
+
+        # ============================EDIT ACCOUNT========================================================================================
         @self.app.route("/admin/edit_account",methods=["GET","POST"])
         @self.checklogin
         def edit_account():
