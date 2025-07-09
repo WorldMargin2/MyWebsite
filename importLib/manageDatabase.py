@@ -302,7 +302,7 @@ class AdminDB(Database):
             cs.execute("DROP TABLE if exists LOGIN_LOG")
             cs.execute("CREATE TABLE LOGIN_LOG (id INTEGER PRIMARY KEY AUTOINCREMENT,admin_name TEXT, time INTEGER,IP TEXT,IP_REGION TEXT)")
             for i in tmp:
-                cs.execute("INSERT INTO LOGIN_LOG VALUES (?,?,?,?,?)",i)
+                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,IP,IP_REGION) VALUES (?,?,?,?)",i)
             db.commit()
             cs.close()
 

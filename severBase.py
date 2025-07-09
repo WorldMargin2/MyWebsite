@@ -162,7 +162,7 @@ class Sever:
 
     def admin_url(self):
 
-        @self.app.route("/update")
+        @self.app.route("/admin/update")
         @self.checklogin
         def triggle_update():
             self.version.update()
