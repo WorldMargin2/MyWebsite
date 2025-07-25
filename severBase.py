@@ -30,13 +30,13 @@ def readFile(file_path):
 
 class Sever:
     def __init__(self):
-        self.app=Flask(__name__,template_folder=f"{WEBFILEPATH}templates")
-        self.app.config["SECRET_KEY"]="SOCITY"
-        self.csrf=CSRFProtect(self.app)
         init_folder()
         self.adminDB=AdminDB()
         self.articleDB=ArticleDB()
         self.version=Version(self.adminDB,self.articleDB)
+        self.app=Flask(__name__,template_folder=f"{WEBFILEPATH}templates")
+        self.app.config["SECRET_KEY"]=self.adminDB.get_config("secret_key") or "secret"
+        self.csrf=CSRFProtect(self.app)
         self.handle_event()
         self.getStatic()
         self.main()
@@ -177,10 +177,8 @@ class Sever:
                 return(render_template("/requireSubmit.html", submit_form=form,tip="您正在执行",opration="退出登录"))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
-                for i in self.adminDB.clear_refuse():
-                    response.set_cookie(i[0], "", expires=0)
                 response.set_cookie("admin_name", "", expires=0)
-                response.set_cookie(self.adminDB.get_config("password_key"), "", expires=0)
+                response.set_cookie("token", "", expires=0)
                 return response
             return(redirect("/404",error="表单验证失败"))
             
@@ -217,7 +215,7 @@ class Sever:
         @self.csrf.exempt
         @self.app.route("/admin/login_log/get_pages",methods=["POST"])
         @self.checklogin
-        def get_admin_login_pages():
+        def get_admin_login_log_pages():
             data=request.form
             time_range_left=data.get("time_range_left")
             time_range_right=data.get("time_range_right")
@@ -228,7 +226,7 @@ class Sever:
         @self.csrf.exempt
         @self.app.route("/admin/login_log/get_length",methods=["POST"])
         @self.checklogin
-        def get_admin_login_length():
+        def get_admin_login_log_length():
             args=request.args
             time_range_left=args.get("time_range_left")
             time_range_right=args.get("time_range_right")
@@ -308,15 +306,14 @@ class Sever:
                             pwd_errs.append("新密码不能为空")
                         else:
                             response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
-                            for i in self.adminDB.clear_refuse():
-                                response.set_cookie(i[0], "", expires=0)
+                            
                             res=self.adminDB.change_password(origin_name,pwd_form.password.data)
                             for i in res.items():
                                 response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
                                 return(response)
                         response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
                         return(response)
-                return(render_template("admin/edit_name_pwd.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
+                return(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
 
 
     def redirect_404(self,error=None):

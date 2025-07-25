@@ -262,9 +262,15 @@ class ArticleDB(Database):
 
 class AdminDB(Database):
     db=ADMINDB
-    max_salt_count=10
     max_log_count=99999
     max_pass_error_count=5
+
+    cache={
+        "config": {},
+        "administs": { #max :50
+            # $admin_name:{ "tokens":{$token:$ip}}
+        },
+    }
 
     def __init__(self):
         super().__init__()
@@ -273,12 +279,10 @@ class AdminDB(Database):
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute("DROP TABLE if exists Admin")
-            cs.execute("CREATE TABLE Admin (admin_name TEXT, password TEXT)")
+            #token : $token:$ip_address;...
+            cs.execute("CREATE TABLE Admin (admin_name TEXT, password TEXT , tokens TEXT, PRIMARY KEY(admin_name))")
             
             cs.execute("INSERT INTO Admin VALUES (?,?)",("admin",generate_password_hash("adminadmin")))
-
-            cs.execute("DROP TABLE if exists CONFUSE")
-            cs.execute("CREATE TABLE CONFUSE (confuse_key TEXT)")
             
             cs.execute("DROP TABLE if exists LOGIN_LOG")
             cs.execute("CREATE TABLE LOGIN_LOG (id PRIMARY KEY AUTOINCREMENT,admin_name TEXT, time INTERGER,IP TEXT,IP_REGION TEXT)")
@@ -289,22 +293,24 @@ class AdminDB(Database):
             cs.execute("DROP TABLE if exists CONFIG")
             cs.execute("CREATE TABLE CONFIG (CONFIG_NAME TEXT, CONFIG_VALUE TEXT)")
 
-            cs.execute("INSERT INTO CONFIG VALUES (?,?)",("password_key",os.urandom(6).hex()))
-            cs.execute("INSERT INTO CONFIG VALUES (?,?)",("salt","admin"))
             cs.close()
             db.commit()
 
     def update_db(self):
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            cs.execute("select admin_name,time,IP,IP_REGION from LOGIN_LOG")
-            tmp= cs.fetchall()
-            cs.execute("DROP TABLE if exists LOGIN_LOG")
-            cs.execute("CREATE TABLE LOGIN_LOG (id INTEGER PRIMARY KEY AUTOINCREMENT,admin_name TEXT, time INTEGER,IP TEXT,IP_REGION TEXT)")
-            for i in tmp:
-                cs.execute("INSERT INTO LOGIN_LOG(admin_name,time,IP,IP_REGION) VALUES (?,?,?,?)",i)
-            db.commit()
+            cs.execute("DROP TABLE if exists Confuse")
+            cs.execute("select * from Admin")
+            info=["admin",self.get_hash_pwd("admin"),""]
+            cs.execute("DROP TABLE if exists ADMIN")
+            cs.execute("CREATE TABLE Admin (admin_name TEXT, password TEXT ,tokens TEXT, PRIMARY KEY(admin_name))")
+            cs.execute("INSERT INTO Admin VALUES (?,?,?)",info)
+            cs.execute("delete from config where config_name='password_key'")
+            cs.execute("delete from config where config_name='salt'")
             cs.close()
+            db.commit()
+
+            
 
     # ==========================================LOGIN LOG========================================
 
@@ -366,53 +372,26 @@ class AdminDB(Database):
         
     # ==========================================PASSWORD========================================
 
-    def get_name_password(self,cookie:dict):
-        with dbconnect(self.db) as db:
-            cs=db.cursor()
-            cs.execute("select config_value from config where config_name='password_key'")
-            password_key=cs.fetchone()[0]
-            cs.close()
-            name=cookie.get("admin_name")
-            password=cookie.get(password_key)
-            return (name,password)
-    
-    def __summon_confuse(self,cs:Cursor):
-        confuse_strs=(
-            (os.urandom(6).hex(),)
-            for i in range(10)
-        )
-        cs.executemany("INSERT INTO CONFUSE VALUES (?)",confuse_strs)
-        return confuse_strs
 
-    def summon_confuse(self):
-        with dbconnect(self.db) as db:
-            cs=db.cursor()
-            res=self.__summon_confuse(cs)
-            cs.close()
-            db.commit()
-            return(res)
     
-    def __clear_confuse(self,cs:Cursor):
-        cs.execute("select confuse_key from CONFUSE")
-        confuse_strs=cs.fetchall()
-        cs.execute("delete from CONFUSE")
-        return confuse_strs
-    
-    def clear_refuse(self)->list:
-        with dbconnect(self.db) as db:
-            cs=db.cursor()
-            res=self.__clear_confuse(cs)
-            cs.close()
-            db.commit()
-            return(res)
 
         
     def __get_config(self,config_name:str,cs:Cursor):
+        if (config_name in self.cache["config"]):
+            return self.cache["config"][config_name]
         cs.execute("select config_value from config where config_name=?",(config_name,))
-        res=cs.fetchone()[0]
+        res=cs.fetchone()
+        if res is None:
+            res = None
+        else:
+            res = res[0]
+        self.cache["config"][config_name]=res
         return res
 
     def get_config(self,config_name:str):
+        if (config_name in self.cache["config"]):
+            return self.cache["config"][config_name]
+
         with dbconnect(self.db) as db:
             cs=db.cursor()
             res=self.__get_config(config_name,cs)
@@ -420,14 +399,18 @@ class AdminDB(Database):
             return res
 
     def __set_config(self,config_name:str,config_value:str,cs:Cursor):
-        old_config_value=self.__get_config(config_name,cs)[0]
+        self.cache["config"][config_name]=config_value
+        old_config_value=self.__get_config(config_name,cs)
         cs.execute("update config set config_value=? where config_name=?",(config_value,config_name))
         return old_config_value
 
     def set_config(self,config_name:str,config_value:str):
+        if ("config" not in self.cache):
+            self.cache["config"]=dict()
+            
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            res=self.__get_config(config_name,cs)
+            res=self.__get_config(config_name,config_value,cs)
             cs.close()
             db.commit()
             return res
@@ -435,31 +418,131 @@ class AdminDB(Database):
     def change_name(self,origin_name,name):
         with dbconnect(self.db) as db:
             cs=db.cursor()
+            cs.execute("select count(*) from admin where admin_name=?",(name,))
+            if(cs.fetchone()[0]>0):
+                return False
             cs.execute("update admin set admin_name=? where admin_name=?",(name,origin_name))
             cs.execute("UPDATE LOGIN_LOG SET admin_name=? WHERE admin_name=?", (name, origin_name))
             cs.close()
             db.commit()
             return True
+        
 
-    def change_password(self,admin_name,pwd):
+    def get_custuom_encrypt_pwd(self,pwd:str)->str:
+        last_char=pwd[-1]
+        secret_value=ord(last_char) % len(pwd)
+        res=""
+        for i,c in enumerate(pwd):
+            if i % 2 == 0:
+                res+= chr(ord(c) | secret_value)
+            else:
+                res+= chr(ord(c) & secret_value)
+        return res
+
+    def get_hash_pwd(self,pwd:str)->str:
+        return generate_password_hash(self.get_custuom_encrypt_pwd(pwd))
+    
+    def delete_token(self,name:str,token:str):
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            new_salt=os.urandom(6).hex()
-            new_hashed_pwd=generate_password_hash(pwd+new_salt)
-            password_key=os.urandom(6).hex()
+            cs.execute("SELECT tokens FROM Admin WHERE admin_name=?",(name,))
+            data=cs.fetchone()
+            if data is None:
+                return False
+            tokens=data[0].split(";")
+            temp=dict()
+            new_tokens=""
+            for i in tokens:
+                if i=="":
+                    continue
+                (t,ip)=i.split(":")
+                if t!=token:
+                    new_tokens+=f"{t}:{ip};"
+                    temp[t]=ip
+            self.cache["administs"][name]={
+                "tokens":temp
+            }
+            cs.execute("UPDATE Admin SET tokens=? WHERE admin_name=?", (new_tokens,name))
+            cs.close()
+            db.commit()
+        return True
+    
+    def __summon_token(self,name:str,ip_address:str,cs:Cursor):
+        token=os.urandom(10).hex()
+        if name not in self.cache["administs"]:
+            self.cache["administs"][name]={
+                "tokens":{token:ip_address}
+            }
+        self.cache["administs"][name]["tokens"][token]=ip_address
+        if(len(self.cache["administs"])>50):
+            self.cache["administs"].popitem(last=False)
+        if(len(self.cache["administs"][name]["tokens"])>5):
+            self.cache["administs"][name]["tokens"].popitem(last=False)
+        temp=""
+        for i in self.cache["administs"][name]["tokens"]:
+            temp+=f"{i}:{self.cache['administs'][name]['tokens'][i]};"
+        cs.execute("update admin set tokens=? where admin_name=?",(temp,name))
+        return token
+    
+    def summon_token(self,name:str,ip_address:str)->str:
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            res=self.__summon_token(name,ip_address,cs)
+            db.commit()
+            return res
+
+    def get_tokens(self,name:str)->str:
+        if name in self.cache["administs"]:
+            return self.cache["administs"][name]["tokens"]
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("select tokens from admin where admin_name=?",(name,))
+            res=cs.fetchone()
+            if res:
+                return res[0]
+            else:
+                return None
+    
+    def check_token(self,name:str,token:str)->bool:
+        if name in self.cache["administs"]:
+            if token in self.cache["administs"][name]["tokens"]:
+                return True
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+            cs.execute("SELECT tokens FROM Admin WHERE admin_name=?",(name,))
+            data=cs.fetchone()
+
+            if data is None:
+                return False
+            tokens=data[0].split(";")
+            self.cache["administs"][name]={
+                "tokens":{}
+            }
+            for i in tokens:
+                if i=="":
+                    continue
+                (token,ip)=i.split(":")
+                self.cache["administs"][name]["tokens"][token]=ip
+                if token==token:
+                    return True
+            return False
+
+
+    def change_password(self,admin_name,pwd,ip_address:str="255.255.255.255"):
+        with dbconnect(self.db) as db:
+            cs=db.cursor()
+
+            new_hashed_pwd=self.get_hash_pwd(pwd)
+            token=self.__summon_token(admin_name,ip_address,cs)
             cs.execute("UPDATE Admin SET password=? WHERE admin_name=?",(new_hashed_pwd,admin_name))
-            self.__set_config("password_key",password_key,cs)
-            self.__set_config("salt",new_salt,cs)
-            confuse_strs=self.__summon_confuse(cs)
+            cs.execute("UPDATE Admin SET tokens=? WHERE admin_name=?", (f"{token}:{ip_address};",admin_name))
+
             cs.close()
             db.commit()
             res={
-                    i:generate_password_hash(os.urandom(6).hex()) for i in confuse_strs
-                }
-            res.update({
                 "admin_name":admin_name,
-                password_key:new_hashed_pwd,
-            })
+                "token":token,
+            }
             return (
                 res
             )
@@ -468,14 +551,13 @@ class AdminDB(Database):
     def check_pwd(self,name,pwd:str):
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            salt=self.__get_config("salt",cs)
-            cs.execute("SELECT * FROM Admin WHERE admin_name=?",(name,))
+            cs.execute("SELECT password FROM Admin WHERE admin_name=?",(name,))
             data=cs.fetchone()
             cs.close()
             if(data==None):
                 return (None)
-            (_,_password)=data
-            if(check_password_hash(_password,pwd+salt)):
+            _password=data[0]
+            if(check_password_hash(_password,self.get_custuom_encrypt_pwd(pwd))):
                 return True
             else:
                 return False
@@ -483,31 +565,21 @@ class AdminDB(Database):
     def login(self,name:str,password:str,ip:str)->dict:
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            salt=self.__get_config("salt",cs)
-            cs.execute("SELECT * FROM Admin WHERE admin_name=?",(name,))
+            cs.execute("SELECT password FROM Admin WHERE admin_name=?",(name,))
             data=cs.fetchone()
             if(data==None):
                 return (None)
-            (_,_password)=data
-            if(check_password_hash(_password,password+salt)):
-                new_salt=os.urandom(6).hex()
-                new_hashed_pwd=generate_password_hash(password+new_salt)
-                password_key=os.urandom(6).hex()
-                cs.execute("UPDATE Admin SET password=? WHERE admin_name=?",(new_hashed_pwd,name))
-                self.__set_config("password_key",password_key,cs)
-                self.__set_config("salt",new_salt,cs)
-                confuse_strs=self.__summon_confuse(cs)
+            _password=data[0]
+            if(check_password_hash(_password,self.get_custuom_encrypt_pwd(password))):
                 login_time=time.time()
                 self._insert_login_log(cs,name,login_time,ip)
+                token=self.__summon_token(name,ip,cs)
                 cs.close()
                 db.commit()
                 res={
-                        i:generate_password_hash(os.urandom(6).hex()) for i in confuse_strs
-                    }
-                res.update({
                     "admin_name":name,
-                    password_key:new_hashed_pwd,
-                })
+                    "token":token,
+                }
                 return (
                     res
                 )
@@ -518,21 +590,11 @@ class AdminDB(Database):
     def check_longin(self,cookie:dict):
         if cookie==None:
             return False
-        admin_name,password=self.get_name_password(cookie)
-        if( not (admin_name and password)):
+        admin_name,token= cookie.get("admin_name"),cookie.get("token")
+        if( not (admin_name and token)):
             return False
-        with dbconnect(self.db) as db:
-            cs=db.cursor()
-            cs.execute("SELECT * FROM Admin WHERE admin_name=?",(admin_name,))
-            data=cs.fetchone()
-            cs.close()
-            if(data==None):
-                return False
-            (_,_password)=data
-            if(password==_password):
-                return True
-            else:
-                return False
+        if(self.check_token(admin_name, token)):
+            return True
 
 
 

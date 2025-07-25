@@ -6,6 +6,7 @@ body {
 }
 
 .article_container {
+    z-index: 0;
     max-width: 1400px;
     margin: 2em auto 2em auto;
     padding: 1.5em 1em;
@@ -20,6 +21,7 @@ body {
 }
 
 .article_container .article {
+    z-index: 1;
     box-shadow: 0 2px 12px rgba(37,99,235,0.08);
     transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
     border-radius: 14px;
@@ -28,6 +30,7 @@ body {
     padding: 0.9em 1.5em;
     display: flex;
     flex-direction: column;
+    overflow: visible;
     gap: 0.5em;
     position: relative;
     max-width: 100%;
@@ -35,6 +38,7 @@ body {
     margin: 0;
 }
 .article_container .article:hover {
+    z-index: 2;
     box-shadow: 0 8px 32px rgba(37,99,235,0.18);
     transform: translateY(-2px) scale(1.01);
     border: 1.5px solid #60a5fa;

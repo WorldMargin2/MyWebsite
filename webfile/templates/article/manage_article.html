@@ -53,13 +53,16 @@
             let operation_list = $(this).find(".operation_list");
             let height = operation_list.height();
             operation_container.stop().animate({
-                "height": height + "px"
+                "height": height + "px",
+                "opacity": "1"
             },200);
         });
         $(".operation_menu").on("mouseleave", function() {
             let operation_container = $(this).find(".operation_container");
             operation_container.stop().animate({
-                "height": "0px"
+                "height": "0px"             
+            }, 200).animate({
+                "opacity": "0"
             }, 200, function() {
                 operation_container.css({
                     "display": "none"
