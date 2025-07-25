@@ -177,6 +177,9 @@ class Sever:
                 return(render_template("/requireSubmit.html", submit_form=form,tip="您正在执行",opration="退出登录"))
             if(form.validate_on_submit()):
                 response = make_response(redirect("/admin/login"))
+                name=request.cookies.get("admin_name")
+                token=request.cookies.get("token")
+                self.adminDB.delete_token(name, token)
                 response.set_cookie("admin_name", "", expires=0)
                 response.set_cookie("token", "", expires=0)
                 return response
@@ -293,7 +296,7 @@ class Sever:
                         name_errs.append("用户名不合法")
                     else:
                         response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
-                        res=self.adminDB.change_name(origin_name,name_form.admin_name.data)
+                        res=self.adminDB.change_name(origin_name,name_form.admin_name.data, request.remote_addr)
                         if(not res):
                             name_errs.append("用户名已存在")
                         else:
@@ -313,7 +316,7 @@ class Sever:
                         else:
                             response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
                             
-                            res=self.adminDB.change_password(origin_name,pwd_form.password.data)
+                            res=self.adminDB.change_password(origin_name,pwd_form.password.data, request.remote_addr)
                             for i in res.items():
                                 response.set_cookie(i[0], i[1], max_age=60 * 60 * 24 * 7)
                                 return(response)

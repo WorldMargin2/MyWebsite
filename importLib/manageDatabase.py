@@ -450,6 +450,8 @@ class AdminDB(Database):
     def __delete_token(self,name:str,token:str="",cs:Cursor=None):
         if token=="":
             cs.execute("update admin set tokens='' where admin_name=?",(name,))
+            if name in self.cache["administs"]:
+                del self.cache["administs"][name]
         cs.execute("SELECT tokens FROM Admin WHERE admin_name=?",(name,))
         data=cs.fetchone()
         if data is None:
@@ -509,10 +511,21 @@ class AdminDB(Database):
             cs=db.cursor()
             cs.execute("select tokens from admin where admin_name=?",(name,))
             res=cs.fetchone()
-            if res:
-                return res[0]
-            else:
+            if not res:
                 return None
+            tokens=res[0].split(";")
+            temp=dict()
+            for i in tokens:
+                if i=="":
+                    continue
+                (token,ip)=i.split(":")
+                temp[token]=ip
+            self.cache["administs"][name]={
+                "tokens":temp
+            }
+            if(len(self.cache["administs"])>50):
+                self.cache["administs"].popitem(last=False)
+            return temp
     
     def check_token(self,name:str,token:str)->bool:
         if name in self.cache["administs"]:
@@ -532,11 +545,10 @@ class AdminDB(Database):
             for i in tokens:
                 if i=="":
                     continue
-                (token,ip)=i.split(":")
-                self.cache["administs"][name]["tokens"][token]=ip
-                if token==token:
-                    return True
-            return False
+                (_token,ip)=i.split(":")
+                self.cache["administs"][name]["tokens"][_token]=ip
+            
+            return token in self.cache["administs"][name]["tokens"]
 
 
     def change_password(self,admin_name,pwd,ip_address:str="255.255.255.255"):
@@ -547,7 +559,7 @@ class AdminDB(Database):
             
             
             cs.execute("UPDATE Admin SET password=? WHERE admin_name=?",(new_hashed_pwd,admin_name))
-            self.delete_token(admin_name, "")
+            self.__delete_token(admin_name, "",cs)
             token=self.__summon_token(admin_name,ip_address,cs)
 
             cs.close()
