@@ -3,7 +3,7 @@ import json
 from .handlers import restart
 
 class Version:
-    ver="1.9"
+    ver="2.0"
     def check_version(self):
         ver:tuple
         with dbconnect(ADMINDB) as db:
