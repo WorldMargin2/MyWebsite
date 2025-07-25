@@ -415,17 +415,22 @@ class AdminDB(Database):
             db.commit()
             return res
         
-    def change_name(self,origin_name,name):
+    def change_name(self,origin_name,name,ip_address:str="")->str:
         with dbconnect(self.db) as db:
             cs=db.cursor()
             cs.execute("select count(*) from admin where admin_name=?",(name,))
             if(cs.fetchone()[0]>0):
-                return False
+                return None
+            
+            if(name in self.cache["administs"]):
+                del self.cache["administs"][name]
             cs.execute("update admin set admin_name=? where admin_name=?",(name,origin_name))
             cs.execute("UPDATE LOGIN_LOG SET admin_name=? WHERE admin_name=?", (name, origin_name))
+            self.delete_token(origin_name, "")
+            token=self.__summon_token(name, ip_address,cs)
             cs.close()
             db.commit()
-            return True
+            return token
         
 
     def get_custuom_encrypt_pwd(self,pwd:str)->str:
@@ -442,30 +447,36 @@ class AdminDB(Database):
     def get_hash_pwd(self,pwd:str)->str:
         return generate_password_hash(self.get_custuom_encrypt_pwd(pwd))
     
-    def delete_token(self,name:str,token:str):
+    def __delete_token(self,name:str,token:str="",cs:Cursor=None):
+        if token=="":
+            cs.execute("update admin set tokens='' where admin_name=?",(name,))
+        cs.execute("SELECT tokens FROM Admin WHERE admin_name=?",(name,))
+        data=cs.fetchone()
+        if data is None:
+            return False
+        tokens=data[0].split(";")
+        temp=dict()
+        new_tokens=""
+        for i in tokens:
+            if i=="":
+                continue
+            (t,ip)=i.split(":")
+            if t!=token:
+                new_tokens+=f"{t}:{ip};"
+                temp[t]=ip
+        self.cache["administs"][name]={
+            "tokens":temp
+        }
+        cs.execute("UPDATE Admin SET tokens=? WHERE admin_name=?", (new_tokens,name))
+        return True
+    
+    def delete_token(self,name:str,token:str=""):
         with dbconnect(self.db) as db:
             cs=db.cursor()
-            cs.execute("SELECT tokens FROM Admin WHERE admin_name=?",(name,))
-            data=cs.fetchone()
-            if data is None:
-                return False
-            tokens=data[0].split(";")
-            temp=dict()
-            new_tokens=""
-            for i in tokens:
-                if i=="":
-                    continue
-                (t,ip)=i.split(":")
-                if t!=token:
-                    new_tokens+=f"{t}:{ip};"
-                    temp[t]=ip
-            self.cache["administs"][name]={
-                "tokens":temp
-            }
-            cs.execute("UPDATE Admin SET tokens=? WHERE admin_name=?", (new_tokens,name))
+            res=self.__delete_token(name, token, cs)
             cs.close()
             db.commit()
-        return True
+        return res
     
     def __summon_token(self,name:str,ip_address:str,cs:Cursor):
         token=os.urandom(10).hex()
@@ -533,9 +544,11 @@ class AdminDB(Database):
             cs=db.cursor()
 
             new_hashed_pwd=self.get_hash_pwd(pwd)
-            token=self.__summon_token(admin_name,ip_address,cs)
+            
+            
             cs.execute("UPDATE Admin SET password=? WHERE admin_name=?",(new_hashed_pwd,admin_name))
-            cs.execute("UPDATE Admin SET tokens=? WHERE admin_name=?", (f"{token}:{ip_address};",admin_name))
+            self.delete_token(admin_name, "")
+            token=self.__summon_token(admin_name,ip_address,cs)
 
             cs.close()
             db.commit()

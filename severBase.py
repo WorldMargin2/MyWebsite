@@ -293,8 +293,14 @@ class Sever:
                         name_errs.append("用户名不合法")
                     else:
                         response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
-                        self.adminDB.change_name(origin_name,name_form.admin_name.data)
-                        response.set_cookie("admin_name",name_form.admin_name.data,max_age=60 * 60 * 24 * 7)
+                        res=self.adminDB.change_name(origin_name,name_form.admin_name.data)
+                        if(not res):
+                            name_errs.append("用户名已存在")
+                        else:
+                            name_form.admin_name.data=name_form.admin_name.data
+                            name_errs.append("用户名修改成功")
+                            response.set_cookie("token", res["token"], max_age=60 * 60 * 24 * 7)
+                            response.set_cookie("admin_name",name_form.admin_name.data,max_age=60 * 60 * 24 * 7)
                         return(response)
                     response=make_response(render_template("admin/edit_account.html",name_form=name_form,pwd_form=pwd_form,name_errs=name_errs,pwd_errs=pwd_errs))
                     return(response)
