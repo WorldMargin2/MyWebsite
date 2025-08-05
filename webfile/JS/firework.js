@@ -20,33 +20,36 @@ const args_template = {
 class Particle {
     wakes = []; // [x, y]
     now_life = 0;
+    v_x = 0;
+    v_y = 0;
+    initial_x = 0;
+    initial_y = 0;
     constructor(arg={},type="e"? "e":"l") {// e:爆炸 l:发射
         this.arg = arg;
+        this.v_x = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
+        this.v_y = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
+        this.initial_x = arg.x;
+        this.initial_y = arg.y;
         this.life_time = type=="l"? arg.life_time:arg.explode_time;
         this.type = type;
     };
 
-    calculatePosition(delta) {
-        let vx = Math.cos(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        let vy = Math.sin(this.arg.angle / 180 * Math.PI) * this.arg.speed;
-        vy -= (this.arg.gravity*delta)/1000;
-        this.arg.angle = Math.atan2(vy, vx) * 180 / Math.PI;
-        this.arg.speed = Math.sqrt(vx * vx + vy * vy);
-        this.arg.x += (vx*delta)/1000;
-        this.arg.y += (vy*delta)/1000;
-    }
+    calculatePosition() {
+        this.arg.x = this.initial_x + this.v_x * (this.now_life / 1000);
+        this.arg.y = this.initial_y + this.v_y * (this.now_life / 1000) - ( this.arg.gravity * Math.pow(this.now_life , 2) / 1000000) / 2;
+    };
 
     update(delta) {
+        this.now_life+= delta;
         if (this.now_life >= (this.life_time * 1000)) {
             if(this.type == "e") {
-                this.ease_out(delta);
+                this.ease_out();
             }else if (this.type == "l") {
                 this.arg.life_time_callback?this.arg.life_time_callback(this.arg.x, this.arg.y):0;
             };
             return;
         };
-        this.calculatePosition(delta);
-        this.now_life+= delta;
+        this.calculatePosition();
         this.wakes.push([this.arg.x, this.arg.y]);
         if (this.wakes.length > this.arg.wake_particles) {
             this.wakes.shift();
@@ -54,8 +57,8 @@ class Particle {
         this.draw();
     };
 
-    ease_out(delta) {
-        this.calculatePosition(delta);
+    ease_out() {
+        this.calculatePosition();
         if(this.wakes.length == 0) {
             if (this.arg.life_time_callback) {
                 this.arg.life_time_callback();
